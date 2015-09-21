@@ -1,18 +1,25 @@
-function display_ali2(alifile,wavscp)
-%UNTITLED2 Summary of this function goes here
+function display_ali(alifile,wavscp,model,phones)
+%  UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
 % Default argument  
-if nargin < 2
-    alifile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/alipdf.1';
+if nargin < 4
+    alifile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
+    model = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/final.mdl';
+    phones = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/lang/phones.txt';
 end
 
 % Read wav file and alignment for all the utterance IDs.
 % Map from uid to wav launch pipes.
-Scp = load_kaldi_wavscp();
+Scp = load_kaldi_wavscp(wavscp);
+
+% For mapping back and forth between phones and their indices.
+P = phone_indexer(phones);
+
+% Create and load the alignments in various formats.
 % Cell array of Uid, and cell array of alignment vectors.
-[Uid,Align] = load_ali();
+[Uid,Basic,Pdf,Phone,Phone_seq] = load_ali(alifile,model)
 
 % Index in Uid and Align of the utterance being displayed.
 ui = 1;
@@ -25,28 +32,35 @@ uid = 0; ,PH = 0; SU = 0; PHstart = 0; ,PHend = 0; SUstart = 0; SUend = 0; w = 0
 
 M = 0; S1 = 0; SN = 0; N = 100;
 F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
+PX = 0;
 
 utterance_data(ui);
  
 % Set phone and audio data for k'th utterance.
     function utterance_data(k)
-        [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali1(Uid,Align,k);
+        [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali(Uid,Pdf,k);
+        PX = Phone{k};
         % Maximum frame index
         [~,F] = size(PH);
         % Load audio. Cat the pipe Scp(uid) into a temporary file.
-        cmd = [Scp(uid), ' cat > /tmp/align3_tmp.wav'];
+        cmd = [Scp(uid), ' cat > /tmp/display_ali_tmp.wav'];
+        disp(cmd);
+        system('echo $SHELL');
+        system('which flac');
         system(cmd);
-        wav = '/tmp/align3_tmp.wav';
+        %system('flac -c -d -s /projects/speech/data/librispeech/LibriSpeech/train-clean-100/103/1240/103-1240-0015.flac | cat > /tmp/display_ali_tmp.wav');
+        wav = '/tmp/display_ali_tmp.wav';
         % Read the temporary wav file.
-        [w,fs] = wavread(wav);
+        [w,fs] = audioread(wav);
         % Number of audio samples in a centisecond frame.
         M = fs / 100;
         [nsample,~] = size(w);
         [~,nframe] = size(PH);
     end
 
-
-
+    % Range of samples being displayed, this is global.
+    SR = [];
+    
     function display_alignment(f)
         % f is the suggested start frame
         FN = min([f + 100, F]);
@@ -67,20 +81,27 @@ utterance_data(ui);
         % SU(N) subphone that the Nth frame is in.
         % SUstart(PH(p)) start of pth phone
         for p = (SU(F1) + 1):SU(FN)
+           % k is a frame
            k = SUstart(p);
            bar = line([k,k],[-0.1,0.1],'LineWidth',2.0,'Color',[0.9,0.9,0.9]);
         end
         
         % Draw phone bars.
         for p = (PH(F1) + 1):PH(FN)
+           % k is a frame
            k = PHstart(p);
            bar = line([k,k],[-0.1,0.1],'LineWidth',2.0,'Color','g');
+           % 
+           pn = int2str(p);
+           ps = P.ind2phone(PX(k));
+           text(k,0.09,pn);
+            text(k,0.085,ps);
         end
         
 
         hold;
         pp = patch([F1,FN,FN,F1],[0,0,0.5,0.5],'g');
-        ps = patch([F1,FN,FN,F1],[0,0,-0.5,-0.5],'r');
+        ps = patch([F1,FN,FN,F1],[0,0,-0.5,-0.5],'r' );
         
         % Function handles for use in gui.
         hspp = @subphoneplay;
@@ -111,6 +132,15 @@ utterance_data(ui);
         sound(w(st:en),fs);
     end
 
+    function play_current(~,~)
+        % phone = PH(int16(floor(y.IntersectionPoint(1))));
+        % disp(sprintf('phone %d',phone));
+        %M = fs / 100;
+        %st = (PHstart(phone) - 1) * M;
+        %en = PHend(phone) * M;
+        sound(w(SR),fs);
+    end
+
 
     function next_utterance(~,~)
         ui = ui + 1;
@@ -133,6 +163,7 @@ utterance_data(ui);
     hpu = @previous_utterance;
     hinc = @increment_frame;
     hdec = @decrement_frame;
+    hcurr = @play_current;
     
     function increment_frame(~,~)
         clf;
@@ -151,6 +182,7 @@ utterance_data(ui);
         bnext = uicontrol('Callback',hnu,'String','U>','Position', [40 10 25 25]);
         bdec = uicontrol('Callback',hdec,'String','<F','Position', [90 10 25 25]);
         binc = uicontrol('Callback',hinc,'String','F>','Position', [120 10 25 25]);
+        bcurr = uicontrol('Callback',hcurr,'String','P','Position', [160 10 25 25]);
     end
 
 figure();
