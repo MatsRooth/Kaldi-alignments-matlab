@@ -1,4 +1,4 @@
-function [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali1(Uid,Align,n)
+function [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali(Uid,Align,n)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
