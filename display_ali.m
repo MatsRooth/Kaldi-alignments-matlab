@@ -28,17 +28,19 @@ ui = 1;
 [~,U] = size(Uid);
 
 % Initialize some variables that are set in nested functions.
-uid = 0; ,PH = 0; SU = 0; PHstart = 0; ,PHend = 0; SUstart = 0; SUend = 0; w = 0; fs = 0;
+uid = 0; uid2 = 0; PH = 0; SU = 0; PHstart = 0; PHend = 0; SUstart = 0; SUend = 0; w = 0; fs = 0;
 
 M = 0; S1 = 0; SN = 0; N = 100;
 F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
-PX = 0;
+PX = 0; ya = 0;
 
 utterance_data(ui);
  
 % Set phone and audio data for k'th utterance.
     function utterance_data(k)
         [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali(Uid,Pdf,k);
+        % Escape underline for display.
+        uid2 = strrep(uid, '_', '\_');
         PX = Phone{k};
         % Maximum frame index
         [~,F] = size(PH);
@@ -72,9 +74,10 @@ utterance_data(ui);
         S1 = F1 * M; SN = FN * M;
         % Range of samples to display.
         SR = S1:SN;
-        plot(SR/M,w(SR));
+        plot(SR/M,w(SR),'Color',[0.7,0.7,0.7]);
         sound(w(SR),fs);
-        axis([S1/M, SN/M, -0.1, 0.1]);
+        ya = 1.2 * max(abs(w));
+        axis([S1/M, SN/M, -ya, ya]);
         
         
         % Draw subphone bars.
@@ -83,19 +86,19 @@ utterance_data(ui);
         for p = (SU(F1) + 1):SU(FN)
            % k is a frame
            k = SUstart(p);
-           bar = line([k,k],[-0.1,0.1],'LineWidth',2.0,'Color',[0.9,0.9,0.9]);
+           bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.8,0.8]);
         end
         
         % Draw phone bars.
         for p = (PH(F1) + 1):PH(FN)
            % k is a frame
            k = PHstart(p);
-           bar = line([k,k],[-0.1,0.1],'LineWidth',2.0,'Color','g');
+           bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
            % 
            pn = int2str(p);
            ps = P.ind2phone(PX(k));
-           text(k,0.09,pn);
-            text(k,0.085,ps);
+           %text(k,0.09,pn);
+           text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
         end
         
 
@@ -108,10 +111,20 @@ utterance_data(ui);
         hpp = @phoneplay;
         
         set(ps,'ButtonDownFcn',hspp,... 
-            'PickableParts','all','FaceColor','r','FaceAlpha',0.05);
+            'PickableParts','all','FaceColor','r','FaceAlpha',0.02);
 
         set(pp,'ButtonDownFcn',hpp,... 
-            'PickableParts','all','FaceColor','g','FaceAlpha',0.1);
+            'PickableParts','all','FaceColor','r','FaceAlpha',0.02);
+    end
+
+    function p2 = trim_phone(p)
+        % Remove the part of phone symbol p after '_'.
+        p = p{1};
+        p2 = p;
+        loc = strfind(p,'_');
+        if loc
+           p2 = p2(1:(loc - 1)); 
+        end 
     end
 
     function subphoneplay(~,y)
@@ -141,6 +154,9 @@ utterance_data(ui);
         sound(w(SR),fs);
     end
 
+    function play_all(~,~)
+        sound(w,fs);
+    end
 
     function next_utterance(~,~)
         ui = ui + 1;
@@ -156,7 +172,6 @@ utterance_data(ui);
         clf;
         display_alignment(1); 
         add_buttons;
-
     end
 
     hnu = @next_utterance;
@@ -164,6 +179,7 @@ utterance_data(ui);
     hinc = @increment_frame;
     hdec = @decrement_frame;
     hcurr = @play_current;
+    hall = @play_all;
     
     function increment_frame(~,~)
         clf;
@@ -183,11 +199,19 @@ utterance_data(ui);
         bdec = uicontrol('Callback',hdec,'String','<F','Position', [90 10 25 25]);
         binc = uicontrol('Callback',hinc,'String','F>','Position', [120 10 25 25]);
         bcurr = uicontrol('Callback',hcurr,'String','P','Position', [160 10 25 25]);
+        ball = uicontrol('Callback',hall,'String','A','Position', [200 10 25 25]);
+        title(uid2,'FontSize',18);
     end
 
 figure();
 display_alignment(1);
-add_buttons;
+add_buttons;      
+title(uid2);
+
+
+
+% ui  index in Uid and Align of the current token
+% uid utterance ID of current token
 
 end
 
