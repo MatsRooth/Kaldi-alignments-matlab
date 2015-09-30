@@ -19,7 +19,7 @@ P = phone_indexer(phones);
 
 % Create and load the alignments in various formats.
 % Cell array of Uid, and cell array of alignment vectors.
-[Uid,Basic,Pdf,Phone,Phone_seq] = load_ali(alifile,model)
+[Uid,Basic,Pdf,Phone,Phone_seq] = load_ali(alifile,model);
 
 % Index in Uid and Align of the utterance being displayed.
 ui = 1;
@@ -37,6 +37,7 @@ PX = 0; ya = 0;
 utterance_data(ui);
  
 % Set phone and audio data for k'th utterance.
+% Values are for utterance k.
     function utterance_data(k)
         [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali(Uid,Pdf,k);
         % Escape underline for display.
