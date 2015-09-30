@@ -1,7 +1,6 @@
 function [Key,Basic,Pdf,Phone,Phone_seq] = load_ali(alifile,model)
-% Load from a Kaldia algignment file in integer basic, pdf, and 
+% Load from a Kaldi algignment file in integer basic, pdf, and 
 % phone formats, using decoding information from model.
-
 
 % Default argument.  This pdf alignment file has 129 lines.
 if nargin < 1
@@ -17,19 +16,25 @@ system(cmd);
 basic_stream = fopen(basic_ali);
 
 % Probability density ids.
+% For each frame, the id of the pdf used for it.
 pdf_ali = '/tmp/align3_pdf_ali.txt';
 cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-pdf ', model, ' ark,t:- ark,t:- >', pdf_ali];
 system(cmd);
 pdf_stream = fopen(pdf_ali);
 
 % Phones.
+% For each frame, the numerical phone it is in.
 phone_ali = '/tmp/align3_phone_ali.txt';
 cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones  --per-frame ', model, ' ark,t:- ark,t:- >', phone_ali];
 system(cmd);
 phone_stream = fopen(phone_ali);
 
+% Sequence of numerical phones transcribing the utterance.
+% This should be modified to provide also the length in frames of each
+% phone.
 phone_seq = '/tmp/align3_phone_seq.txt';
-cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones ', model, ' ark,t:- ark,t:- >', phone_seq];
+% --write-lengths
+cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones --write-lengths ', model, ' ark,t:- ark,t:- >', phone_seq];
 system(cmd);
 phone_seq_stream = fopen(phone_seq);
 
@@ -51,14 +56,20 @@ while ischar(line_basic)
     Pdf{j} = ap;
     [keyh,ah] = parse_alignment(line_phone);
     Phone{j} = ah;
-    [keys,as] = parse_alignment(line_phone_seq);
+    %[keys,as] = parse_alignment_with_length(line_phone_seq);
+    [keys,as] = parse_alignment_with_length(line_phone_seq);
     Phone_seq{j} = as;
     %disp(size(a));
+    %disp(j);
     j = j + 1;
     line_basic = fgetl(basic_stream);
 end
 
-
+% Close the imput streams.
+fclose(basic_stream);
+fclose(pdf_stream);
+fclose(phone_stream);
+fclose(phone_seq_stream);
 
 % Parse a line into a key and a vector of int.
 function [key,a] = parse_alignment(line)
@@ -69,6 +80,22 @@ function [key,a] = parse_alignment(line)
     a = sscanf(line,'%d')';
 end
 
+% Parse a line into a key and a vector of int.
+% The input line looks like this.
+%   bns04_st1921_trn 1 12 ; 6 7 ; 143 3 ; 50 8 ; 60 3 ; 143 4 ; 146 13
+function [key,A] = parse_alignment_with_length(line)
+    % Scan the key
+    key = sscanf(line,'%s',1);
+    [~,klen] =  size(key);
+    [~,llen] = size(line);
+    % Get rid of the key. 
+    line = line((klen+1):llen);
+    % Now we have this:
+    % 1 12 ; 6 7 ; 143 3 ; 50 8 ; 60 3 ; 143 4 ; 146 13
+    A = sscanf(line,'%d %d %*[;]',[2,Inf]);
+    % A has numerical phones in the first row, and
+    % length in frames in the second row.
+end
 % Illustrate Key and Align.
 % Key{129}
 % Align{129}(10:20)
