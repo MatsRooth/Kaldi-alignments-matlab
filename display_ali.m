@@ -94,10 +94,13 @@ utterance_data(ui);
         for p = (PH(F1) + 1):PH(FN)
            % k is a frame
            k = PHstart(p);
-           bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
-           % 
            pn = int2str(p);
            ps = P.ind2phone(PX(k));
+           if P.isbeginning(PX(k))
+                bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.85,0.2,0.2]);
+           else
+                bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
+           end
            %text(k,0.09,pn);
            text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
         end
