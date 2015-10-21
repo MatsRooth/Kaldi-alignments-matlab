@@ -1,4 +1,4 @@
-function display_ali(alifile,wavscp,model,phones)
+function display_ali(alifile,wavscp,model,phones,transcript)
 %  UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -8,11 +8,15 @@ if nargin < 4
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
     model = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/final.mdl';
     phones = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/lang/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/text';
 end
 
 % Read wav file and alignment for all the utterance IDs.
 % Map from uid to wav launch pipes.
 Scp = load_kaldi_wavscp(wavscp);
+
+% Read transcript.
+Tra = load_kaldi_transcript(transcript);
 
 % For mapping back and forth between phones and their indices.
 P = phone_indexer(phones);
@@ -28,18 +32,23 @@ ui = 1;
 [~,U] = size(Uid);
 
 % Initialize some variables that are set in nested functions.
-uid = 0; uid2 = 0; PH = 0; SU = 0; PHstart = 0; PHend = 0; SUstart = 0; SUend = 0; w = 0; fs = 0;
+uid = 0; uid2 = 0; PH = 0; SU = 0; PHstart = 0; PHend = 0; SUstart = 0; SUend = 0; WRstart = 0; w = 0; fs = 0;
 
 M = 0; S1 = 0; SN = 0; N = 100;
 F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
-PX = 0; ya = 0;
+PX = 0; ya = 0; tra = 0; wi = 1;
 
 utterance_data(ui);
  
+
+% [PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali2(uid,Align_pdf,Align_phone,Tra,P,n)
+
 % Set phone and audio data for k'th utterance.
 % Values are for utterance k.
     function utterance_data(k)
-        [uid,PH,SU,PHstart,PHend,SUstart,SUend] = parse_ali(Uid,Align_pdf,Align_phone_len,k);
+        uid = cell2mat(Uid(k));
+        [PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
+        % tra = Tra(uid);
         % Escape underline for display.
         uid2 = strrep(uid, '_', '\_');
         PX = Align_phone{k};
@@ -92,12 +101,16 @@ utterance_data(ui);
         
         % Draw phone bars.
         for p = (PH(F1) + 1):PH(FN)
+           % p is a phone as index
            % k is a frame
            k = PHstart(p);
            pn = int2str(p);
            ps = P.ind2phone(PX(k));
-           if P.isbeginning(PX(k))
+           %if P.isbeginning(PX(k))
+           if WRstart(p) > 0
                 bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.85,0.2,0.2]);
+                text(k,-ya * 0.8,tra(WRstart(p)),'FontSize',18);
+                wi = wi + 1;
            else
                 bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
            end
@@ -164,6 +177,7 @@ utterance_data(ui);
 
     function next_utterance(~,~)
         ui = ui + 1;
+        wi = 1;
         utterance_data(ui);
         clf;
         display_alignment(1); 
@@ -204,14 +218,14 @@ utterance_data(ui);
         binc = uicontrol('Callback',hinc,'String','F>','Position', [120 10 25 25]);
         bcurr = uicontrol('Callback',hcurr,'String','P','Position', [160 10 25 25]);
         ball = uicontrol('Callback',hall,'String','A','Position', [200 10 25 25]);
-        title(uid2,'FontSize',18);
+        title([int2str(ui),' ',uid2],'FontSize',18);
     end
 
 figure();
 display_alignment(1);
 add_buttons;      
-title(uid2);
 
+%title([ui,' ',uid2],'FontSize',18);
 
 
 % ui  index in Uid and Align of the current token
