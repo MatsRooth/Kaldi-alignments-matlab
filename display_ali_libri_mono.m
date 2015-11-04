@@ -1,4 +1,4 @@
-function display_ali_libri_mono1()
+function display_ali_libri_mono()
 %  UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -16,7 +16,7 @@ setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/u
 % Run display program.
 system('which flac');
 system('echo $SHELL')
-display_ali(alifile,wavscp,model,phones'');
+display_ali(alifile,wavscp,model,phones);
 
 end
 

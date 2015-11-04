@@ -29,9 +29,9 @@ cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-ph
 system(cmd);
 phone_stream = fopen(phone_ali);
 
-% Sequence of numerical phones transcribing the utterance.
-% This should be modified to provide also the length in frames of each
-% phone.
+% Sequence of numerical phones transcribing the utterance with lengths..
+% ahh05_st0556_trn 1 11 ; 182 9 ; 16 6 ; 159 3 ; 90 11 ;
+ 
 phone_seq = '/tmp/align3_phone_seq.txt';
 % --write-lengths
 cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones --write-lengths ', model, ' ark,t:- ark,t:- >', phone_seq];
