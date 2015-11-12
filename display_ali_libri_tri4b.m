@@ -8,13 +8,13 @@ function display_ali_libri_tri4b()
     % Obratained by concatenating ali.?.gz
     % cat ali.all.gz | gzip -d | copy-int-vector ark:- ark,t:- > ali.all-t
     % gzip ali.all-t.gz
-    alifile = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/ali.all-t.gz';
+    alifile = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/ali-e3-t.gz';
     % 28539 /Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/wav.scp
-    wavscp = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/wav.scp';
+    wavscp = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/wav-e3.scp';
     model = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/final.mdl';
     phones = '/Volumes/NONAME/speech/librispeech/s5/data/lang_nosp/phones.txt';
     % 28539 /Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text
-    transcript = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text';
+    transcript = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text-e3';
 %end
 
 % Make flac available

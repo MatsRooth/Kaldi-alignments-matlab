@@ -204,11 +204,14 @@ utterance_data(ui);
 
     function wordplay(~,y)
         word = F(3,int16(floor(y.IntersectionPoint(1))));
-        disp(sprintf('word %d, frame %d-%d',word,Wb(1,word),Wb(2,word)));
-        M = fs / 100;
-        st = (Wb(1,word) - 1) * M;
-        en = Wb(2,word) * M;
-        sound(w(st:en),fs);
+        % Value is 0 in a silence.
+        if word > 0
+            disp(sprintf('word %d, frame %d-%d',word,Wb(1,word),Wb(2,word)));
+            M = fs / 100;
+            st = (Wb(1,word) - 1) * M;
+            en = Wb(2,word) * M;
+            sound(w(st:en),fs);
+        end
     end
 
     function play_current(~,~)
