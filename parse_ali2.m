@@ -148,8 +148,10 @@ inword = 0;
 % For each frame starting after frame 1.
 for j = 2:Nf
     rem = rem - 1;
-    % If there is a new subphone.
-    if alipdf(j-1) ~= alipdf(j)
+    % If there is a new subphone. This can miss a non-final subphone when
+    % pdfs are shared. The necessary information seems to not be available
+    % in the output of the ali-to-xxxx programs.
+    if alipdf(j-1) ~= alipdf(j) || rem == 0
         % SUend(si) = j - 1;
         % Mark end of previous token subphone.
         Sb(2,si) = j - 1;
