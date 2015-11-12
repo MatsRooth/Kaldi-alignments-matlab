@@ -11,8 +11,12 @@ end
 m = containers.Map;
 s = {};
 
+% Is the phone index a word-beginning such as as 'ay_B', singleton 'ay_S', word-end 'ay_E'?
+% 1 beginning
+% 2 singleton
+% 3 end
+% 0 other
 
-% Is the index a word-beginning as 'ay_B'?
 be = {};
 
 istream = fopen(phone_file);
@@ -32,16 +36,21 @@ while ischar(line)
     m(ph) = k;
     % Record the spelling for the index.
     s{k+1} = ph;
-    line = fgetl(istream);
+    %line = fgetl(istream);
     % Is it a word-beginning
     [~,le] = size(char(ph));
-    disp(ph); disp(le);
+    % disp(ph); disp(le);
     ph2 = char(ph);
+    % beginning or singleton phone
     if strcmp(ph2(le-1:le),'_B')
-        be{k+1} = 1
-    else
-        be{k+1} = 0
-    end 
+        be{k+1} = 1;
+    elseif strcmp(ph2(le-1:le),'_S')
+            be{k+1} = 2;
+    elseif strcmp(ph2(le-1:le),'_E')
+             be{k+1} = 3;
+    else be{k+1} = 0;
+    end
+    line = fgetl(istream);
 end
 
 be = cell2mat(be);
@@ -50,14 +59,17 @@ be = cell2mat(be);
 % The value is a cell, could it be a string?
 f1 = @(j) s(j+1);
 
-% Is it a word-beginning?
-f2 = @(j) be(j+1);
+% Map index to type 0,1,2,3
+f2 = @(j)  be(j+1) == 1 | be(j+1) == 2;
+
+f3 = @(j)  be(j+1) == 2 | be(j+1) == 3;
 
 %phone_index.str = s;
 %phone_index.ind = m;
 phone_index.ind2phone = f1; 
 phone_index.phone2ind = m;
 phone_index.isbeginning = f2;
+phone_index.isend = f3;
 
 end
 
