@@ -145,6 +145,15 @@ wc = 0;
 % Is the current frame in a word?
 inword = 0;
 
+% Does a word start already at frame 1?
+if P.isbeginning(pho)
+    wi = wi + 1;
+    wc = wi;
+    Wb(1,wi) = 1;
+    inword = 1;
+end
+    
+
 % For each frame starting after frame 1.
 for j = 2:Nf
     rem = rem - 1;
@@ -167,7 +176,8 @@ for j = 2:Nf
             % Record end of previous phone.
             Pb(2,pi) = j - 1;
             % If phone filler is a word end, record the end of wi.
-            if P.isend(pho)
+            % Without the check, this caused an error with wi = 0.
+            if P.isend(pho) && wi > 0
                 Wb(2,wi) = j - 1;
                 wc = 0;
             end
@@ -207,8 +217,13 @@ end
 Pb(2,pi) = Nf;
 Sb(2,si) = Nf;
 
-% Reduce Sb to initial part, since they
-% are indexed as subphones rather than frames.
+% If the last word doesn't jave it's end marked, marked it as Nf.
+if Wb(2,wi) == 0
+    Wb(2,wi) = Nf;
+end
+
+% Reduce Sb and Pb to initial parts, since they
+% are indexed as subphones or phones rather than frames.
 Sb = Sb(:,1:si);
 
 %SUstart = SUstart(1:si);

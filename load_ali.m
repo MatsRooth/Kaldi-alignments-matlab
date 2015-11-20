@@ -65,7 +65,7 @@ while ischar(line_basic)
     line_basic = fgetl(basic_stream);
 end
 
-% Close the imput streams.
+% Close the input streams.
 fclose(basic_stream);
 fclose(pdf_stream);
 fclose(phone_stream);
