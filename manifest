@@ -7,3 +7,6 @@ phone_indexer.m
 display_bp.m
 syllcorpus.m
 load_kaldi_transcript.m
+display_libri_mono_10k.m
+display_libri_mono.m
+display_tri1.m
