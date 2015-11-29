@@ -10,7 +10,7 @@ if nargin < 7
     model = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/final.mdl';
     phones = '/Volumes/NONAME/speech/librispeech/s5/data/lang_nosp/phones.txt';
     transcript = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text-e3';
-    obase = '/local/matlab/Kaldi-alignments-matlab/data/bi1';
+    obase = '/local/matlab/Kaldi-alignments-matlab/data/tri1b';
     nvowel = 3;
 end
 
@@ -41,6 +41,12 @@ M = 0; S1 = 0; SN = 0; N = 100;
 F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
 PX = 0; ya = 0; tra = 0; wi = 1;
 Fn = 0;
+
+% Make flac available
+setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
+% setenv('DYLD_LIBARARY_PATH', '/opt/local/lib:/usr/local/lib:/usr/lib');
+% Run display program.
+system('which flac');
 
 utterance_data(ui);
  
@@ -81,6 +87,7 @@ utterance_data(ui);
 [oseg,eseg] = fopen([obase,'-seg'],'w');
 [oali,eali] = fopen([obase,'-ali'],'w');
 [otable,etable] = fopen([obase,'-table'],'w');
+[oscp,etable] = fopen([obase,'-wav.scp'],'w');
 %figure();
 %display_alignment(1);
 %add_buttons;      
@@ -134,16 +141,17 @@ for k = 1:um
                 word = cell2mat(tra(j));
                 uid_count = sprintf('%s_%d',uid,count);
                 % For seg file.
-                fprintf(oseg,'%s %s %d %d\n',uid,uid_count,fr1,fr2);
+                fprintf(oseg,'%s %s %d %d\n',uid_count,uid,fr1,fr2);
                 % For text file
                 fprintf(otext,'%s %s\n',uid_count,word);
                 % For alignment file
                 basic_ali = cell2mat(Basic(k));
                 basic_word_ali = basic_ali(fr1:fr2);
-                fprintf(oali,'%s%s\n',uid_count,sprintf(' %d', uid, basic_word_ali));
+                fprintf(oali,'%s%s\n',uid_count,sprintf(' %d', basic_word_ali));
                 fprintf(otable,'%s\t%s',uid_count,word);
                 fprintf(otable,'\t%s',cell2mat(trim_phones(spelling)));
                 fprintf(otable,'\n');
+                fprintf(oscp,'%s %s sox -t wav - -t wav - trim %ds %ds |\n',uid_count,Scp(uid), fr1 * 0.01 * fs - 1,(fr2 - fr1) * 0.01 * fs - 1);
                 % Need also wavscp? Not for modeling. But see flac --skip and
                 % --until.  Or sox in wavscp pipe.
                 fprintf('%d %s\n',k,uid_count);

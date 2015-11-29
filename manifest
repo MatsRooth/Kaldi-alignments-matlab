@@ -6,3 +6,4 @@ parse_ali.m
 phone_indexer.m
 display_bp.m
 syllcorpus.m
+load_kaldi_transcript.m

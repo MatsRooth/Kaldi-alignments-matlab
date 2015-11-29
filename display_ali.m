@@ -1,4 +1,4 @@
-function display_ali2(alifile,wavscp,model,phones,transcript)
+function display_ali(alifile,wavscp,model,phones,transcript)
 %  UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -41,15 +41,12 @@ Fn = 0; PDF = 0;
 
 utterance_data(ui);
  
-
-% [PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali2(uid,Align_pdf,Align_phone,Tra,P,n)
-
 % Set phone and audio data for k'th utterance.
 % Values are for utterance k.
     function utterance_data(k)
         uid = cell2mat(Uid(k));
         %[PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
-        [F,Sb,Pb,Wb,tra] = parse_ali2(uid,Align_pdf,Align_phone_len,Tra,P,k)
+        [F,Sb,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k)
         % tra = Tra(uid);
         % Escape underline for display.
         uid2 = strrep(uid, '_', '\_');
