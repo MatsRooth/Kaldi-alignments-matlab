@@ -1,206 +1,186 @@
-function syllcorpus(alifile,wavscp,model,phones,transcript,obase,nvowel)
-%  UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
 
-% Default argument  
-if nargin < 7
-    disp('Using default arguments.')
+
+function syllcorpus(extract,extractNext,alifile,wavscp,model,phones,transcript,obase)
+  %  Outputs extractions from the given transcript to files with prefix
+  %  obase. Determines which words to extract via extract
+  %
+  % INPUT:
+  % extract: function from cell array of string, representing phones of a
+  %          word, to whether that word should be extracted  
+  % extractNext : bool - whether the word following a word that satisifies
+  %                      extract should also be extracted
+
+  % Default arguments
+  if nargin < 1
+    extract = @bisyllable; % if relying on default, you should check that num_vowels 
+                           % defined in bisyllable is what you want
+  end 
+  if nargin < 2
+    extractNext = false;
+  end
+  if nargin < 7
+    disp('Using default arguments.');
     alifile = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/ali-e3-t.gz';
     wavscp = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/wav-e3.scp';
     model = '/Volumes/NONAME/speech/librispeech/s5/exp/tri4b/final.mdl';
     phones = '/Volumes/NONAME/speech/librispeech/s5/data/lang_nosp/phones.txt';
     transcript = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text-e3';
-    obase = '/local/matlab/Kaldi-alignments-matlab/data/tri1b';
-    nvowel = 3;
-end
+    obase = '/local/matlab/Kaldi-alignments-matlab/data/tri1b';    
+  end
 
-% Read wav file and alignment for all the utterance IDs.
-% Map from uid to wav launch pipes.
-Scp = load_kaldi_wavscp(wavscp);
+  % Read wav file and alignment for all the utterance IDs.
+  % Map from uid to wav launch pipes.
+  Scp = load_kaldi_wavscp(wavscp);
 
-% Read transcript.
-Tra = load_kaldi_transcript(transcript);
+  % Read transcript.
+  Tra = load_kaldi_transcript(transcript);
 
-% For mapping back and forth between phones and their indices.
-P = phone_indexer(phones);
+  % For mapping back and forth between phones and their indices.
+  phone_index = phone_indexer(phones);
 
-% Create and load the alignments in various formats.
-% Cell array of Uid, and cell array of alignment vectors.
-[Uid,Basic,Align_pdf,Align_phone,Align_phone_len] = load_ali(alifile,model);
+  % Create and load the alignments in various formats.
+  % Cell array of Uid, and cell array of alignment vectors.
+  [Uid,Basic,Align_pdf,Align_phone,Align_phone_len] = load_ali(alifile,model);
 
-% Index in Uid and Align of the utterance being displayed.
-ui = 1;
+  % Make flac available
+  setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
+  % Run display program.
+  system('which flac');
 
-% Maximum value for ui.
-[~,U] = size(Uid);
-
-% Initialize some variables that are set in nested functions.
-uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; fs = 0;
-
-M = 0; S1 = 0; SN = 0; N = 100;
-F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
-PX = 0; ya = 0; tra = 0; wi = 1;
-Fn = 0;
-
-% Make flac available
-setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
-% setenv('DYLD_LIBARARY_PATH', '/opt/local/lib:/usr/local/lib:/usr/lib');
-% Run display program.
-system('which flac');
-
-utterance_data(ui);
- 
-
-% [PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali2(uid,Align_pdf,Align_phone,Tra,P,n)
-
-% Set phone and audio data for k'th utterance.
-% Values are for utterance k.
-    function utterance_data(k)
-        uid = cell2mat(Uid(k));
-        [F,Sb,Pb,Wb,tra] = parse_ali2(uid,Align_pdf,Align_phone_len,Tra,P,k);
-        % Escape underline for display.
-        uid2 = strrep(uid, '_', '\_');
-        PX = Align_phone{k};
-        % Maximum frame index
-        [~,Fn] = size(F);
-        % Load audio. Cat the pipe Scp(uid) into a temporary file.
-        cmd = [Scp(uid), ' cat > /tmp/display_ali_tmp.wav'];
-        %disp(cmd);
-        %system('echo $SHELL');
-        %system('which flac');
-        system(cmd);
-        %system('flac -c -d -s /projects/speech/data/librispeech/LibriSpeech/train-clean-100/103/1240/103-1240-0015.flac | cat > /tmp/display_ali_tmp.wav');
-        wav = '/tmp/display_ali_tmp.wav';
-        % Read the temporary wav file.
-        [w,fs] = audioread(wav);
-        % Number of audio samples in a centisecond frame.
-        M = fs / 100;
-        [nsample,~] = size(w);
-        [~,nframe] = size(F);
-    end
-
-    % Range of samples being displayed, this is global.
-    SR = [];
+  % Output streams.
+  [otext,~] = fopen([obase,'-text'],'w');
+  [oseg,~] = fopen([obase,'-seg'],'w');
+  [oali,~] = fopen([obase,'-ali'],'w');
+  [otable,~] = fopen([obase,'-table'],'w');
+  [oscp,~] = fopen([obase,'-wav.scp'],'w');
     
-% Output streams.
-[otext,etext] = fopen([obase,'-text'],'w');
-[oseg,eseg] = fopen([obase,'-seg'],'w');
-[oali,eali] = fopen([obase,'-ali'],'w');
-[otable,etable] = fopen([obase,'-table'],'w');
-[oscp,etable] = fopen([obase,'-wav.scp'],'w');
-%figure();
-%display_alignment(1);
-%add_buttons;      
-[~,um] = size(Uid);
+  [~,num_utterances] = size(Uid);
 
-% Columns of numerical result.
-% 1 utterance index
-% 2 word offset
-% 3 frame offset 
-% 4 frame length
-% 5 number of bisyllables so far for the word, for new uid
-% 6 int sequence of phones
+  % Columns of numerical result.
+  % 1 utterance index
+  % 2 word offset
+  % 3 frame offset 
+  % 4 frame length
+  % 5 number of bisyllables so far for the word, for new uid
+  % 6 int sequence of phones
 
-% Columns of cell result.
-% 1 uid
-% 2 word filler
-% 3 string sequence of phones
+  % Columns of cell result.
+  % 1 uid
+  % 2 word filler
+  % 3 string sequence of phones
 
-% Segment files look like this.
-% New id                Old id          Frame range
-% adg04_sr009_trn-start adg04_sr009_trn 1 6
-% adg04_sr049_trn-start adg04_sr049_trn 1 6
+  % Segment files look like this.
+  % New id                Old id          Frame range
+  % adg04_sr009_trn-start adg04_sr009_trn 1 6
+  % adg04_sr049_trn-start adg04_sr049_trn 1 6
 
-% For each utterance.
-for k = 1:um
-    u = Uid(k);
-    % fprintf('%d %s\n',k,cell2mat(u));
-    utterance_data(k);
-    [~,wm] = size(Wb);
-    % Number of bisyllables found so far in the utterance.
+  temporaryAudioFile = '/tmp/display_ali_tmp.wav';
+  
+  for k = 1:num_utterances
+    % get phone and audio data for k^th utterance
+    uid = cell2mat(Uid(k));
+    [F,~,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,phone_index,k);
+    PX = Align_phone{k};
+    system([Scp(uid),' cat > ',temporaryAudioFile]);
+    [~,sample_rate] = audioread(temporaryAudioFile);
+    [~,num_words] = size(Wb);
+    
+    % Number of extraction found so far in the utterance.
     count = 0;
-    % For each word in the utterance.
-    for j = 1:wm
-        % First and last frames indices for the word.
-        fr1 = Wb(1,j);
-        fr2 = Wb(2,j);
-        % Without checking fr1 and fr2,
-        % get error around here 375 1069-133709-0040
-        % Subscript indices must either be real positive integers or logicals.
-        % Error in syllcorpus (line 124)
-        % p2 = F(2,fr2);
-        if fr1 > 0 && fr2 > 0
-            % The range of phone indices for the word is p1:p2.
-            p1 = F(2,fr1);
-            p2 = F(2,fr2);
-            % The spelling of the word in localized phones, 
-            % e.g.     'd_B'    'ax_I'    'z_E'
-            spelling = P.ind2phone(PX(Pb(1,p1:p2)));
-            if bisyllable(spelling,nvowel)
-                count = count + 1;
-                word = cell2mat(tra(j));
-                uid_count = sprintf('%s_%d',uid,count);
-                % For seg file.
-                fprintf(oseg,'%s %s %d %d\n',uid_count,uid,fr1,fr2);
-                % For text file
-                fprintf(otext,'%s %s\n',uid_count,word);
-                % For alignment file
-                basic_ali = cell2mat(Basic(k));
-                basic_word_ali = basic_ali(fr1:fr2);
-                fprintf(oali,'%s%s\n',uid_count,sprintf(' %d', basic_word_ali));
-                fprintf(otable,'%s\t%s',uid_count,word);
-                fprintf(otable,'\t%s',cell2mat(trim_phones(spelling)));
-                fprintf(otable,'\n');
-                fprintf(oscp,'%s %s sox -t wav - -t wav - trim %ds %ds |\n',uid_count,Scp(uid), fr1 * 0.01 * fs - 1,(fr2 - fr1) * 0.01 * fs - 1);
-                % Need also wavscp? Not for modeling. But see flac --skip and
-                % --until.  Or sox in wavscp pipe.
-                fprintf('%d %s\n',k,uid_count);
-            end
+    for word_index = 1:num_words
+      % First and last frames indices for the word.
+      fr1 = Wb(1,word_index);
+      fr2 = Wb(2,word_index);
+      % Without checking fr1 and fr2,
+      % get error around here 375 1069-133709-0040
+      % Subscript indices must either be real positive integers or logicals.
+      % Error in syllcorpus (line 124)
+      % p2 = F(2,fr2);
+      if fr1 > 0 && fr2 > 0
+        % The range of phone indices for the word is p1:p2.
+        p1 = F(2,fr1);
+        p2 = F(2,fr2);
+        % The spelling of the word in localized phones, 
+        % e.g.     'd_B'    'ax_I'    'z_E'
+        spelling = phone_index.ind2phone(PX(Pb(1,p1:p2)));
+        if extract(spelling)
+          count = count + 1;
+          word = cell2mat(tra(word_index));
+          uid_count = sprintf('%s_%d',uid,count);
+          if (extractNext && word_index < num_words)
+            fr2 = Wb(2, word_index + 1);
+            word = [word, ' ', cell2mat(tra(word_index + 1))]; 
+          end          
+          % For seg file.
+          fprintf(oseg,'%s %s %d %d\n',uid_count,uid,fr1,fr2);
+          % For text file
+          fprintf(otext,'%s %s\n',uid_count,word);
+          % For alignment file
+          basic_ali = cell2mat(Basic(k));
+          basic_word_ali = basic_ali(fr1:fr2);
+          fprintf(oali,'%s%s\n',uid_count,sprintf(' %d', basic_word_ali));
+          fprintf(otable,'%s\t%s',uid_count,word);
+          fprintf(otable,'\t%s',cell2mat(trim_phones(spelling)));
+          fprintf(otable,'\n');
+          fprintf(oscp,'%s %s sox -t wav - -t wav - trim %ds %ds |\n',uid_count,Scp(uid), fr1 * 0.01 * sample_rate - 1,(fr2 - fr1) * 0.01 * sample_rate - 1);
+          % Need also wavscp? Not for modeling. But see flac --skip and
+          % --until.  Or sox in wavscp pipe.
+          fprintf('%d %s\n',k,uid_count);
         end
+      end
     end
-end
-fclose('all');
+  end
+  fclose('all');
 end
 
-function tv = bisyllable(spelling,n)
-   % Is the argument a bisyllable?
-   c0 = 0;
-   c1 = 0;
-   c2 = 0;
-   for x = spelling
-       x = trim_phone(x);
-       if strfind(x,'0')
-           c0 = c0 + 1;
-       end
-       if strfind(x,'1')
-           c1 = c1 + 1;
-       end
-       if strfind(x,'2')
-           c2 = c2 + 1;
-       end
-   end
-   if c0 + c1 + c2 == n
-       tv = 1;
-   else
-       tv = 0;
-   end
+% Extraction Functions
+
+function tv = bisyllable(spelling)
+  % Is the argument a bisyllable?
+  % INPUT:
+  %   spelling : (hprizontal) cell array of strings - phones
+  
+  % target number of vowels
+  num_vowels = 3; 
+  c0 = 0;
+  c1 = 0;
+  c2 = 0;
+  for x = spelling
+    phone = trim_phone(x);
+    if strfind(phone,'0')
+        c0 = c0 + 1;
+    end
+    if strfind(phone,'1')
+        c1 = c1 + 1;
+    end
+    if strfind(phone,'2')
+        c2 = c2 + 1;
+    end
+  end
+  tv = (c0 + c1 + c2 == num_vowels);
 end
     
-function p2 = trim_phone(p)
-    % Remove the part of phone symbol p after '_'.
-    p = p{1};
-    p2 = p;
-    loc = strfind(p,'_');
-    if loc
-        p2 = p2(1:(loc - 1));
-    end
+function p = trim_phone(pCell)
+  % Removes the part of phone symbol p after (and including) '_'.
+  % INPUT:
+  %   pCell : cell array containing a phone (string)
+  % OUTPUT:
+  % p : trimmed phone (string)
+  p = pCell{1};
+  loc = strfind(p,'_');
+  if loc
+      p = p(1:(loc - 1));
+  end
 end
 
 function p2 = trim_phones(ps1)
+  % INPUT:
+  %   ps1 : cell array of strings - phones
+  % OUTPUT:
+  %   p2 : cell array of strings - trimmed phones (with leading space)
   p2 = ps1(1:length(ps1));
   for k = 1:length(ps1);
     p2(k) = {[' ',trim_phone(ps1(k))]}; 
   end
 end
-
 

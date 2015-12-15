@@ -4,11 +4,11 @@ function display_ali(alifile,wavscp,model,phones,transcript)
 
 % Default argument  
 if nargin < 5 
-    alifile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/ali.1.gz';
-    wavscp = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
-    model = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/final.mdl';
-    phones = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/lang/phones.txt';
-    transcript = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/text';
+  alifile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/ali.1.gz';
+  wavscp = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
+  model = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/final.mdl';
+  phones = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/lang/phones.txt';
+  transcript = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/text';
 end
 
 % Read wav file and alignment for all the utterance IDs.
@@ -46,7 +46,7 @@ utterance_data(ui);
     function utterance_data(k)
         uid = cell2mat(Uid(k));
         %[PH,SU,PHstart,PHend,SUstart,SUend,WRstart,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
-        [F,Sb,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k)
+        [F,Sb,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
         % tra = Tra(uid);
         % Escape underline for display.
         uid2 = strrep(uid, '_', '\_');
