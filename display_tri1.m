@@ -1,6 +1,7 @@
 function display_tri1()
-%  UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%  Librispeech tri1 alignments.
+
+% This is giving load_ali error
 
 alifile = '/local/Matlab/Kaldi-alignments-matlab/data/tri1-ali.gz';
 wavscp = '/local/Matlab/Kaldi-alignments-matlab/data/tri1-wav.scp';

@@ -1,15 +1,13 @@
 function display_ali_libri_mono()
-%  UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%  Display Librispeech 100k mono alignments.
 
-% Default argument  
-%if nargin < 5
-    alifile = '/Volumes/NONAME/speech/librispeech/s5/exp/mono/ali.all.gz';
-    wavscp = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/wav.scp';
-    model = '/Volumes/NONAME/speech/librispeech/s5/exp/mono/final.mdl';
-    phones = '/Volumes/NONAME/speech/librispeech/s5/data/lang_nosp/phones.txt';
-    transcript = '/Volumes/NONAME/speech/librispeech/s5/data/train_clean_100/text';
-%end
+EGS = '/projects/speech/sys/kaldi-trunk/egs/';
+
+alifile = [EGS, 'librispeech/s5/exp/mono/ali.all.gz'];
+wavscp = [EGS, 'librispeech/s5/data/train_clean_100/wav.scp'];
+model = [EGS,'librispeech/s5/exp/mono/final.mdl'];
+phones = [EGS,'librispeech/s5/data/lang_nosp/phones.txt'];
+transcript = [EGS,'librispeech/s5/data/train_clean_100/text'];
 
 % Make flac available
 setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');

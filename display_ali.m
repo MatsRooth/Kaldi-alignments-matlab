@@ -1,8 +1,9 @@
 function display_ali(alifile,wavscp,model,phones,transcript)
-%  UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+%  Display Kaldi phone alignments, with functionality for playing
+%  subphones, phones, words, and the utterance.
+%  The default corpus/model is resource management monophone.
 
-% Default argument  
+% Default arguments, using standard paths.  
 if nargin < 5 
   alifile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/exp/mono/ali.1.gz';
   wavscp = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
@@ -22,7 +23,7 @@ Tra = load_kaldi_transcript(transcript);
 P = phone_indexer(phones);
 
 % Create and load the alignments in various formats.
-% Cell array of Uid, and cell array of alignment vectors.
+% The values are cell arrays. See load_ali for documentation.
 [Uid,Basic,Align_pdf,Align_phone,Align_phone_len] = load_ali(alifile,model);
 
 % Index in Uid and Align of the utterance being displayed.
@@ -31,7 +32,7 @@ ui = 1;
 % Maximum value for ui.
 [~,U] = size(Uid);
 
-% Initialize some variables that are set in nested functions.
+% Data used in the GUI are in global variables.
 uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; fs = 0;
 
 M = 0; S1 = 0; SN = 0; N = 100;
