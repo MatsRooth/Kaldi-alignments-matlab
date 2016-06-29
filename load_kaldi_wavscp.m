@@ -7,10 +7,10 @@ if nargin < 1
 end
 
 % Initialize the map.
-Scp = containers.Map();
+Scp = containers.Map('KeyType','char','ValueType','char');
 
-istream = fopen(scpfile);
-%j = 1;
+istream = fopen(scpfile); 
+j = 1;
 
 % Iterate through the lines of wavscp.
 line = fgetl(istream);
@@ -19,16 +19,17 @@ while ischar(line)
     [uid,scp] = parse_wavscp(line);
     Scp(uid) = scp;
     %disp(j);
-    %j = j + 1;
+    j = j + 1;
     line = fgetl(istream);
 end
 fclose(istream);
 
 function [uid,scp] = parse_wavscp(line)
-    k = strfind(line,' ');
+    % Split uid from pipe by whitespace.
+    [A,~,C] = regexp(line,'[ \t]+','split');
+    uid = cell2mat(A(1));
     [~,m] = size(line);
-    uid = line(1:(k - 1));
-    scp = line((k+1):m);
+    scp = line(C(1):m);
 end
 
 end
