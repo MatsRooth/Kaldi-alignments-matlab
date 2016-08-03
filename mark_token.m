@@ -1,5 +1,5 @@
 function mark_token(datfile,tokenfile,markdir,framec,audiodir)
-% The .mat file is created with con
+% The .mat file datfile is created with con
 % May need addpath('/local/matlab/voicebox')
 if nargin < 5
     audiodir = 0;
@@ -20,7 +20,7 @@ if nargin < 3
     tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1.tok';
     markdir = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1';
     % Number of frames to display.
-    framec = 200;
+    framec = 150;
 end
 
 % Load sets dat to a structure. It has to be initialized first.
@@ -309,9 +309,10 @@ utterance_data(ui);
        display_alignment(lft);
     end
 
+
     function p2 = trim_phone(p)
         % Remove the part of phone symbol p after '_'.
-        % p = p{1};
+        p = p{1};
         p2 = p;
         loc = strfind(p,'_');
         if loc

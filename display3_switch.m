@@ -11,7 +11,6 @@ audiobase = '/projects/speech/data/matlab-wav';
 matbase = '/local/matlab/Kaldi-alignments-matlab/data';
 
 switch name
-   % ok
    case 'shruti1'
      datfile = [matbase '/' name '.mat'];
      audiodir = [audiobase '/' name];
@@ -19,8 +18,6 @@ switch name
    case 'bp1'
      datfile = [matbase '/' name '.mat'];
      audiodir = [audiobase '/' name];
-     framec = 150;
-    % ok
    case 'bp3'
      datfile = [matbase '/' name '.mat'];
      framec = 150;
@@ -38,19 +35,15 @@ switch name
      framec = 150;
    case 'ls3a'
      datfile = [matbase '/' name '.mat'];
-     audiodir = 0;
+     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/ls3a';
      framec = 100;  
    case 'ls3all'
      datfile = [matbase '/' name '.mat'];
-     audiodir = 0;
+     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/ls3all';
      framec = 100; 
    case 'etri10k'
      datfile = [matbase '/' name '.mat'];
      audiodir = '/Volumes/D/projects/speech/data/matlab-wav/etri10k';
-     framec = 100;  
-   case 'will1'
-     datfile = [matbase '/' name '.mat'];
-     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/will1';
      framec = 100;  
    otherwise
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/tri4b-e2.mat';
@@ -59,13 +52,8 @@ switch name
     framec = 150;
 end
 
-
-if (audiodir == 0)
-    display_ali3(datfile,framec);
-else
-    display_ali3(datfile,framec,audiodir);
-end
- 
+display_ali3(datfile,framec);
+disp(1);
 end
 
 

@@ -27,23 +27,25 @@ switch name
      phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/data/lang/phones.txt';
      transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/data/trainWORD2/text';
      datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp3';
-   % OK
    case 'shruti1'
-     alifile = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/exp/mono_ali2/ali.1.gz';
-     wavscp = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/data/train70_2/wav.scp';
-     model = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/exp/mono_ali2/final.mdl';
-     phones = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/data/lang/phones.txt';
-     transcript = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/data/train70_2/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/shruti1';
-     audiodir = '/projects/speech/data/matlab-wav/shruti1';
-   % This one doesnt copy audio.
+     datfile = [matbase '/' name '.mat'];
+     audiodir = [audiobase '/' name];
+     framec = 150;
    case 'bp1'
-     alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/exp/mono_ali2/ali.1.gz';
-     wavscp = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/data/train2/wav.scp';
-     model = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/exp/mono_ali2/final.mdl';
-     phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/data/lang/phones.txt';
-     transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/data/train2/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp1';
+     datfile = [matbase '/' name '.mat'];
+     audiodir = [audiobase '/' name];
+   case 'bp2all'
+     datfile = [matbase '/' name '.mat'];
+     audiodir = [audiobase '/' name];
+     framec = 150;
+   case 'rm_s5a1'
+     datfile = [matbase '/' name '.mat'];
+     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/rm_s5a1';
+     framec = 150;
+   case 'rm_s5a3'
+     datfile = [matbase '/' name '.mat'];
+     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/rm_s5a3';
+     framec = 150;
    case 'ls3a'
      alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.1.gz';
      wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
@@ -51,6 +53,7 @@ switch name
      phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
      transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
      datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3a';
+     % audiodir = '/Volumes/D/projects/speech/data/matlab-wav/ls3a';
    case 'ls3all'
     alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.all.gz';
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
@@ -58,15 +61,11 @@ switch name
     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3all';
+    % audiodir = '/Volumes/D/projects/speech/data/matlab-wav/ls3all';
    case 'etri10k'
-    alifile = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/exp/tri_ali2_10k/ali.1.gz';
-    wavscp = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/data/train_10k/wav.scp';
-    model = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/exp/tri_ali2_10k/final.mdl';
-    phones = '/projects/speech/sys/kaldi-trunk/egs/etri/c1//data/lang/phones.txt';
-    transcript = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/data/train_10k/text'; 
-    datbase = '/local/matlab/Kaldi-alignments-matlab/data/etri10k';
-    % Rewrite audio.
-    audiodir = '/projects/speech/data/matlab-wav/etri10k';
+     datfile = [matbase '/' name '.mat'];
+     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/etri10k';
+     framec = 100;  
    otherwise
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/tri4b-e2.mat';
     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/rm_s5a1';
@@ -78,7 +77,7 @@ end
 if (audiodir == 0)
     convert_ali(alifile,wavscp,model,phones,transcript,datbase);
 else
-    convert_ali(alifile,wavscp,model,phones,transcript,datbase,audiodir);
+    convert_ali(alifile,wavscp,model,phones,transcript,datbase,audidir);
 end
 end
 
