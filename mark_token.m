@@ -9,16 +9,19 @@ if nargin < 4
     framec = 100;
 end
 
-% IH1 utterances of will.
-% head -2 ls3all-willih1b-IH1.tok
-% 103-1240-0054-V	43	1273	1295	WILLih1	 W IH1 L
-% 1034-121119-0071-V	12	350	375	WILLih1	 W IH1 L
+% Utterances of will.
+%  head -4 ls3-WILLih1b.tok 
+%103-1240-0044-V	12	321	333	WILLih1	W AH0 L
+%103-1240-0050-V	35	924	935	WILLih1	W AH0 L
+%103-1240-0054-V	43	1273	1295	WILLih1	W IH1 L
+%103-1241-0031-V	27	687	711	WILLih1	W AH0 L
+% Note that the uids end with -V.
 if nargin < 3
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
     audiodir = 0;
     % Tokens of 'will'.
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1.tok';
-    markdir = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b.tok';
+    markdir = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b';
     % Number of frames to display.
     framec = 200;
 end
