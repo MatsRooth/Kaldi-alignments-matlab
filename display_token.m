@@ -14,8 +14,8 @@ end
 if nargin < 1
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
     audiodir = 0;
-    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1.tok';
+    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
     % Number of frames to display.
     framec = 100;
 end

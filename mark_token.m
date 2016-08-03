@@ -16,7 +16,7 @@ end
 if nargin < 3
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
     audiodir = 0;
-    % Tokens of 'will' that were heard has having an IH1 vowel.
+    % Tokens of 'will'.
     tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1.tok';
     markdir = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1';
     % Number of frames to display.

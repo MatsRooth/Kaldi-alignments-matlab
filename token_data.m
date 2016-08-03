@@ -10,9 +10,9 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3a.mat';
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3a-WILLih1.tok';
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3a-WILLih1b.tok';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLa.tok';
+    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLb.tok';
 end
 
 % Load sets dat to a structure. It has to be initialized first.
