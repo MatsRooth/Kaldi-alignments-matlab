@@ -12,10 +12,10 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3a.mat';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
     audiodir = 0;
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3a-WILLih1.tok';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all-willih1b-IH1.tok';
     % Number of frames to display.
     framec = 100;
 end
@@ -60,7 +60,7 @@ end
 fclose(token_stream);
 
 % Given a token index j,
-%   Tu{j} is the uid for the token as a string. Why not an index?
+%   Tu{j} is the uid for the token as a string. 
 %   To{j} is the word offset
  
 % Index in Tu and To of token being displayed.
@@ -289,7 +289,6 @@ utterance_data(ui);
 
     function p2 = trim_phone(p)
         % Remove the part of phone symbol p after '_'.
-        p = p{1};
         p2 = p;
         loc = strfind(p,'_');
         if loc
@@ -405,8 +404,8 @@ utterance_data(ui);
     end
 
     function add_buttons 
-        bprev = uicontrol('Callback',hpu,'String','<U','Position', [10 10 25 25]);
-        bnext = uicontrol('Callback',hnu,'String','U>','Position', [40 10 25 25]);
+        bprev = uicontrol('Callback',hpu,'String','<T','Position', [10 10 25 25]);
+        bnext = uicontrol('Callback',hnu,'String','T>','Position', [40 10 25 25]);
         bdec = uicontrol('Callback',hdec,'String','<F','Position', [90 10 25 25]);
         binc = uicontrol('Callback',hinc,'String','F>','Position', [120 10 25 25]);
         binc = uicontrol('Callback',hdebug,'String','debug','Position', [600 10 50 25]);
