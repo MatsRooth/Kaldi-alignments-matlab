@@ -3,6 +3,9 @@ function convert_ali(alifile,wavscp,model,phones,transcript,savefile,audiodir)
 %  If audiodir is given, write wav files there and store the audiodir
 %  in dat.audiodir, and the wav file names in dat.wav.
 
+%  Conversion stores information which allows display or markup using a
+%  token index.
+
 % May need addpath('/local/matlab/voicebox')
 
 if nargin < 7
@@ -28,7 +31,9 @@ Scp = load_kaldi_wavscp(wavscp);
 Tra = load_kaldi_transcript(transcript);
 
 % For mapping back and forth between phones and their indices.
-P = phone_indexer(phones);
+% Switch to true object orientation.
+% P = phone_indexer(phones);
+P = PhoneIndexer(phones);
 
 % Create and load the alignments in various formats.
 % Cell array of Uid, and cell array of alignment vectors.

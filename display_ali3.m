@@ -222,7 +222,7 @@ utterance_data(ui);
 
     function p2 = trim_phone(p)
         % Remove the part of phone symbol p after '_'.
-        p = p{1};
+        % p = p{1};
         p2 = p;
         loc = strfind(p,'_');
         if loc
