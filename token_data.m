@@ -11,10 +11,10 @@ end
 % Default for demo.
 if nargin < 1
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLa.tok';
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLb.tok';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
+    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b.tok';
 end
-
+ 
 % Load sets dat to a structure. It has to be initialized first.
 dat = 0;
 load(datfile);
@@ -95,7 +95,6 @@ Fn = 0; PDF = 0;
  
     function p2 = trim_phone(p)
         % Remove the part of phone symbol p after '_'.
-        p = p{1};
         p2 = p;
         loc = strfind(p,'_');
         if loc
@@ -103,10 +102,11 @@ Fn = 0; PDF = 0;
         end 
     end
 
-    function p2 = trim_phones(ps1)
-        p2 = ps1(1:length(ps1));
-        for k = 1:length(ps1);
-          p2(k) = {[' ',trim_phone(ps1(k))]}; 
+    function phones2 = trim_phones(phones1)
+        phones2 = phones1(1:length(phones1));
+        for k = 1:length(phones1);
+          %p2(k) = {[' ',trim_phone(ps1(k))]}; 
+          phones2(k) = {[' ',trim_phone(phones1(k))]}; 
         end
     end
 
@@ -129,6 +129,7 @@ for tok = 1:tokmax
     p2 = F(2,fr2);
     % The spelling of the word in localized phones, 
     % e.g.     'd_B'    'ax_I'    'z_E'
+    %%% ======> This got broken by switch to PhoneIndexer.
     spelling = P.ind2phone(PX(Pb(1,p1:p2)));
     %fprintf('%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));
     fprintf(ostream,'%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));

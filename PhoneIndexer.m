@@ -26,9 +26,19 @@ classdef PhoneIndexer
       function phone = ind2phone(obj,j)
         phone = obj.Spell{j+1};
       end
+      
+      function phones = inds2phones(obj,X)
+        X1 = X + ones(size(X));
+        phones = obj.Spell(X1);
+      end
     %phone_index.ind2shortphone = f1s; 
       function phone = ind2shortphone(obj,j)
         phone = obj.ShortSpell{j+1};
+      end
+      
+      function phones = inds2shortphones(obj,X)
+        X1 = X + ones(size(X));
+        phones = obj.ShortSpell(X1);
       end
     %phone_index.phone2ind = m;
       function ind = phone2ind(obj,ph)
