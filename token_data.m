@@ -1,5 +1,10 @@
 function token_data(datfile,tokenfile,outfile)
-% Add information such as phones to token file
+% Add some columns to a token file. The result looks like this.
+%103-1240-0044-V	12	321	333	WILLih1	WAH0L
+%103-1240-0050-V	35	924	935	WILLih1	WAH0L
+%103-1240-0054-V	43	1273	1295	WILLih1	WIH1L
+%103-1241-0031-V	27	687	711	WILLih1	WAH0L
+%   uid, offset, frame start, frame end, word form
 if nargin < 4
     audiodir = 0;
 end
@@ -129,10 +134,10 @@ for tok = 1:tokmax
     p2 = F(2,fr2);
     % The spelling of the word in localized phones, 
     % e.g.     'd_B'    'ax_I'    'z_E'
-    %%% ======> This got broken by switch to PhoneIndexer.
-    spelling = P.ind2phone(PX(Pb(1,p1:p2)));
+    % Spelling of the word in short phones.
+    short_spelling = strjoin(P.inds2shortphones(PX(Pb(1,p1:p2))));
     %fprintf('%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));
-    fprintf(ostream,'%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));
+    fprintf(ostream,'%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,short_spelling);
 end
  
 fclose('all');

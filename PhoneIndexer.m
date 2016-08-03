@@ -40,6 +40,7 @@ classdef PhoneIndexer
         X1 = X + ones(size(X));
         phones = obj.ShortSpell(X1);
       end
+       
     %phone_index.phone2ind = m;
       function ind = phone2ind(obj,ph)
         ind = obj.Map(ph);
