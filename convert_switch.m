@@ -7,13 +7,13 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bp3';
+    name = 'ls3ademo';
 end
 
 datfile = 0;
 audiodir = 0;
 audiobase = '/projects/speech/data/matlab-wav';
-matbase = '/local/matlab/Kaldi-alignments-matlab/data';
+datdir = '/projects/speech/data/matlab-mat';
 
 % If audiodir is not specified, then audio is not converted and copied.
 % The result stores the complete pathname of the audio 
@@ -50,7 +50,25 @@ switch name
      model = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/final.alimdl';
      phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
      transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3a';
+     audiodir = [audiobase '/' name];
+     datbase = [datdir '/' name]; 
+   case 'ls3ademo'
+     alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.1a.gz';
+     wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
+     model = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/final.alimdl';
+     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
+     audiodir = [audiobase '/' name];
+     datbase = [datdir '/' name]; 
+   % Something wrong about the phones as they are displayed.
+   case 'lsdemox'
+     alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/tri3b_ali_clean_100/alig.1.gz';
+     model =   '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/tri3b_ali_clean_100/final.mdl';
+     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
+     wavscp =     '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/train_clean_100/wav.scp';
+     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/train_clean_100/text';
+     audiodir = [audiobase '/' name];
+     datbase = [datdir '/' name];
    case 'ls3all'
     alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.all.gz';
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';

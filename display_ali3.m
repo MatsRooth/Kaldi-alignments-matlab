@@ -153,9 +153,11 @@ utterance_data(ui);
            % k is frame where phone p starts.
            k = Pb(1,p);
            pn = int2str(p);
-           ps = P.ind2phone(PX(k));
+           % ps = P.ind2phone(PX(k));
+           ps = P.ind2shortphone(PX(k));
            bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
-           text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
+           %text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
+           text(k,ya * 0.8,ps,'FontSize',18);
         end
         
        
@@ -220,15 +222,15 @@ utterance_data(ui);
     end
 
 
-    function p2 = trim_phone(p)
-        % Remove the part of phone symbol p after '_'.
-        % p = p{1};
-        p2 = p;
-        loc = strfind(p,'_');
-        if loc
-           p2 = p2(1:(loc - 1)); 
-        end 
-    end
+    %function p2 = trim_phone(p)
+    %    % Remove the part of phone symbol p after '_'.
+    % p = p{1};
+    %    p2 = p;
+    %    loc = strfind(p,'_');
+    %    if loc
+    %       p2 = p2(1:(loc - 1)); 
+    %    end 
+    % end
 
     function subphoneplay(~,y)
         subphone = F(1,int16(floor(y.IntersectionPoint(1))));
@@ -256,7 +258,10 @@ utterance_data(ui);
         word = F(3,int16(floor(y.IntersectionPoint(1))));
         % Value is 0 in a silence.
         if word > 0
-            disp(sprintf('word %d, frame %d-%d\n%s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
+            %disp(sprintf('word %d, frame %d-%d %s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
+            % Display the token that is clicked in token table format.
+            fprintf('%s\t%d\t%d\t%d\t%s\n',uid, word,Wb(1,word),Wb(2,word),tra{word});
+            % uid offset left-bd right-bd wordform
             M = fs / 100;
             st = max(1,floor((Wb(1,word) - 1) * M));
             en = min(floor(Wb(2,word) * M),SN);
