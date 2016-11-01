@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'ls3ademo';
+    name = 'korean1a';
 end
 
 datfile = 0;
@@ -44,6 +44,22 @@ switch name
      phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/data/lang/phones.txt';
      transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_UNAMBIG/data/train2/text';
      datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp1';
+   case 'Unigr_s5_NLex1'
+     alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/ali.1.gz'; %
+     wavscp = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/wav.scp'; %
+     model = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/final.mdl';
+     phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/lang/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/text';
+     datbase = '/local/matlab/Kaldi-alignments-matlab/data/Unigr_s5_NLex1';
+     audiodir = '/projects/speech/data/matlab-wav/Unigr_s5_NLex1'
+   case 'Unigr_s5_NLex'
+     alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/ali.all.gz'; %
+     wavscp = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/wav.scp'; %
+     model = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/final.mdl';
+     phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/lang/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/text';
+     datbase = '/local/matlab/Kaldi-alignments-matlab/data/Unigr_s5_NLex';
+     % Don't save audio.
    case 'ls3a'
      alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.1.gz';
      wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
@@ -76,6 +92,20 @@ switch name
     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3all';
+   case 'vm1a'
+    alifile = '/projects/speech/sys/kaldi-master/egs/vm1_copy/exp/mono_ali/ali.1.gz';
+    wavscp = '/projects/speech/sys/kaldi-master/egs/vm1_copy/data/train/wav.scp';
+    model = '/projects/speech/sys/kaldi-master/egs/vm1_copy/exp/mono_ali/final.mdl';
+    phones = '/projects/speech/sys/kaldi-master/egs/vm1_copy/data/lang/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-master/egs/vm1_copy/data/train/text';
+    datbase = '/local/matlab/Kaldi-alignments-matlab/data/vm1a';
+   case 'korean1a'
+    alifile = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/exp/mono_ali/ali.1.gz';
+    wavscp = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/wav-uid.scp';
+    model = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/exp/mono_ali/final.mdl';
+    phones = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/lang/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/text';
+    datbase = '/local/matlab/Kaldi-alignments-matlab/data/korean1a';
    case 'etri10k'
     alifile = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/exp/tri_ali2_10k/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/data/train_10k/wav.scp';

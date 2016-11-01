@@ -1,4 +1,4 @@
-function mark_token(datfile,tokenfile,markdir,framec,audiodir)
+function mark_token(datfile,tokenfile,markdir,framec,audiodir,viz)
 % The .mat file is created with con
 % May need addpath('/local/matlab/voicebox')
 if nargin < 5
@@ -17,13 +17,14 @@ end
 %103-1241-0031-V	27	687	711	WILLih1	W AH0 L
 % Note that the uids end with -V.
 if nargin < 3
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
+    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
     audiodir = 0;
     % Tokens of 'will'.
     tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b.tok';
     markdir = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b';
     % Number of frames to display.
     framec = 200;
+    viz = 0;
 end
 
 % Load sets dat to a structure. It has to be initialized first.
@@ -192,7 +193,9 @@ utterance_data(ui);
         
         sk = 1.2 * max(abs(w));
         
-        plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
+        if viz==1 
+            plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
+        end
 
         sound(w(SR),fs);
         
@@ -207,26 +210,30 @@ utterance_data(ui);
         % SUstart(PH(p)) start of pth phone
         % for p = (SU(F1) + 1):SU(FN)
         % For each subphone in the display range, except for the first.
-        for p = (F(1,F1) + 1):F(1,FN)
-           % k is a frame
-           % k = SUstart(p);
-           k = Sb(1,p);
-           line([k,k],[-ya,ya],'LineWidth',2.0,'Color',[0.2,0.8,0.8]);
-           pdfindex = int2str(PDF(k));
-           text(k,ya *  (-0.7 + mod(p,2) * 0.08),pdfindex,'FontSize',12);
+        if viz==1
+            for p = (F(1,F1) + 1):F(1,FN)
+                % k is a frame
+                % k = SUstart(p);
+                k = Sb(1,p);
+                line([k,k],[-ya,ya],'LineWidth',2.0,'Color',[0.2,0.8,0.8]);
+                pdfindex = int2str(PDF(k));
+                text(k,ya *  (-0.7 + mod(p,2) * 0.08),pdfindex,'FontSize',12);
+            end
         end
         
         % Draw phone bars.
         % For each phone in the display range, except for the first.
         % for p = (PH(F1) + 1):PH(FN)
-        for p = (F(2,F1) + 1):F(2,FN)
-           % p is a phone as index
-           % k is frame where phone p starts.
-           k = Pb(1,p);
-           pn = int2str(p);
-           ps = P.ind2phone(PX(k));
-           bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
-           text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
+        if viz==1
+            for p = (F(2,F1) + 1):F(2,FN)
+            % p is a phone as index
+            % k is frame where phone p starts.
+                k = Pb(1,p);
+                pn = int2str(p);
+                ps = P.ind2phone(PX(k));
+                bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
+                text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
+            end
         end
         
        
@@ -237,7 +244,9 @@ utterance_data(ui);
            ks = Wb(1,k);
            % If the frame index of the word start is in the display range.
            if (F1 <= ks && ks <= FN)
-              bar = line([ks,ks],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.85,0.2,0.2]);
+               if viz==1
+                    bar = line([ks,ks],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.85,0.2,0.2]);
+               end
               text(ks,-ya * 0.8,tra(k),'FontSize',18);
            end
         end
@@ -251,8 +260,10 @@ utterance_data(ui);
         tt3 = tt1(tt2) / M;
         fx3 = (2 * fx(tt2)/skf) - 1.0;
         
-        hold;
-        plot(tt3,fx3,'*');
+        if viz==1
+            hold;
+            plot(tt3,fx3,'*');
+        end
         
         %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
 
@@ -296,7 +307,9 @@ utterance_data(ui);
         [~,sR] = size(r);
         XR = (((1:sR)/sR) * (xn - x1)) + (ones(1,sR) * x1);
         
-        plot(XR,r);        
+        if viz==1
+            plot(XR,r);    
+        end
         AX2 = axis();
         AX2(1) = AX(1);
         AX2(2) = AX(2);
@@ -414,6 +427,7 @@ utterance_data(ui);
     end
 
     function save_markup(~,~)
+        save_focus;
         ofile = [markdir,'/',int2str(gen),'.tok'];
         ostream = fopen(ofile,'w');
         for k = 1:T
@@ -481,9 +495,13 @@ utterance_data(ui);
 
     function add_buttons 
         %subplot('Position',positionVector3);
-        rf = uicontrol('Style','radio','Callback',@radio_F,'String','F','Position',[440 20 60 20]);
-        rd = uicontrol('Style','radio','Callback',@radio_d,'String','d','Position',[480 20 60 20]);
-        rp = uicontrol('Style','radio','Callback',@radio_p,'String','p','Position',[520 20 60 20]);
+        %rf = uicontrol('Style','radio','Callback',@radio_F,'String','F','Position',[440 20 60 20]);
+        %rd = uicontrol('Style','radio','Callback',@radio_d,'String','d','Position',[480 20 60 20]);
+        %rp = uicontrol('Style','radio','Callback',@radio_p,'String','p','Position',[520 20 60 20]);
+
+        rd = uicontrol('Style','radio','Callback',@radio_d,'String','d','Position',[440 20 60 20]);
+        rp = uicontrol('Style','radio','Callback',@radio_p,'String','p','Position',[480 20 60 20]);
+        rf = uicontrol('Style','radio','Callback',@radio_F,'String','F','Position',[520 20 60 20]);
         ru = uicontrol('Style','radio','Callback',@radio_u,'String','--','Position',[560 20 60 20],'Value',1);
         bprev = uicontrol('Callback',hpu,'String','<T','Position', [10 10 25 25]);
         bnext = uicontrol('Callback',hnu,'String','T>','Position', [40 10 25 25]);

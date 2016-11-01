@@ -6,7 +6,7 @@ function Tra = load_kaldi_transcript(trafile)
 
 % Default argument is in the train directory for rm/s5.
 if nargin < 1
-    trafile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/text';
+    trafile = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/text';
 end
 
 % For a larger example, try

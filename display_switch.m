@@ -2,7 +2,7 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'ls3ademo';
+    name = 'korean1a';
 end
 
 datfile = 0;
@@ -26,6 +26,14 @@ switch name
      framec = 150;
    case 'bp3' % ok
      datfile = [datbase '/' name '.mat'];
+     framec = 150;
+   case 'Unigr_s5_NLex1' % ok
+     datfile = '/local/matlab/Kaldi-alignments-matlab/data/Unigr_s5_NLex1.mat';
+     audiodir = [audiobase '/' name];
+     framec = 150;
+   case 'Unigr_s5_NLex' % ok
+     datfile = '/local/matlab/Kaldi-alignments-matlab/data/Unigr_s5_NLex.mat';
+     % This plays as desired using the command copied from wav.scp.
      framec = 150;
    case 'bp2all' % ok
      datfile = [datbase '/' name '.mat'];
@@ -54,6 +62,14 @@ switch name
      datfile = [datbase '/' name '.mat'];
      audiodir = 0;
      framec = 100; 
+   case 'vm1a' % ok. This uses kaldi to get audio.
+     datfile = [datbase '/' name '.mat'];
+     audiodir = 0;
+     framec = 100; 
+   case 'korean1a'
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/korean1a.mat';
+    audiodir = 0;
+    framec = 150;
    case 'etri10k' % ok
      datfile = [datbase '/' name '.mat'];
      audiodir = '/Volumes/D/projects/speech/data/matlab-wav/etri10k';

@@ -254,8 +254,11 @@ utterance_data(ui);
         sound(w(st:en),fs);
     end
 
-    function wordplay(~,y)
+    function wordplay(x,y)
         word = F(3,int16(floor(y.IntersectionPoint(1))));
+        btn = y.Button;
+        %disp(x);
+        disp(btn);
         % Value is 0 in a silence.
         if word > 0
             %disp(sprintf('word %d, frame %d-%d %s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
@@ -264,7 +267,12 @@ utterance_data(ui);
             % uid offset left-bd right-bd wordform
             M = fs / 100;
             st = max(1,floor((Wb(1,word) - 1) * M));
-            en = min(floor(Wb(2,word) * M),SN);
+            if (btn==3)
+                % Play two words
+                en = min(floor(Wb(2,word + 1) * M),SN);
+            else
+                en = min(floor(Wb(2,word) * M),SN);
+            end
             sound(w2(st:en),fs);
         end
     end
