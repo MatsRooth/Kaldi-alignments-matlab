@@ -1,6 +1,10 @@
-function display_token(datfile,tokenfile,framec,audiodir)
+function display_token(tokenfile,datfile,framec,audiodir)
 % The .mat file datfile is created with con
 % May need addpath('/local/matlab/voicebox')
+
+% display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+
+
 if nargin < 4
     audiodir = 0;
 end
@@ -12,12 +16,21 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
+    datfile = '/projects/speech/data/matlab-mat/ls3all.mat'; %All the 100k data.
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
+    % tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
+    tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
     % Number of frames to display.
-    framec = 100;
+    framec = 80;
+end
+
+if nargin == 1
+    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
+    audiodir = 0; % Audio will be read using Kaldi.
+    tokenfile = ['/local/res/stress/datar/',tokenfile];
+    % Number of frames to display.
+    framec = 120;
 end
 
 % Load sets dat to a structure. It has to be initialized first.
@@ -79,7 +92,7 @@ ui = dat.um(Tu{ti});
 
 
 % Variables that are set in nested functions.
-uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; fs = 0;
+uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; w2 = 0; fs = 0;
 
 M = 0; S1 = 0; SN = 0; N = 100;
 F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; 
@@ -122,6 +135,14 @@ utterance_data(ui);
         wav = find_audio(uid);
         disp(wav);
         [w,fs] = audioread(wav); 
+        
+        % Deal with possibility of two channels.
+        w2 = w;
+        [~,ch] = size(w);
+        if (ch == 2)
+            w = w(:,2);
+        end
+        
         M = fs / 100;
         [nsample,~] = size(w);
         [~,nframe] = size(F);
@@ -318,17 +339,30 @@ utterance_data(ui);
         sound(w(st:en),fs);
     end
 
-    function wordplay(~,y)
+    function wordplay(x,y)
         word = F(3,int16(floor(y.IntersectionPoint(1))));
+        btn = y.Button;
+        %disp(x);
+        disp(btn);
         % Value is 0 in a silence.
         if word > 0
-            disp(sprintf('word %d, frame %d-%d\n%s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
+            %disp(sprintf('word %d, frame %d-%d %s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
+            % Display the token that is clicked in token table format.
+            fprintf('%s\t%d\t%d\t%d\t%s\n',uid, word,Wb(1,word),Wb(2,word),tra{word});
+            % uid offset left-bd right-bd wordform
             M = fs / 100;
             st = max(1,floor((Wb(1,word) - 1) * M));
-            en = min(floor(Wb(2,word) * M),SN);
-            sound(w(st:en),fs);
+            if (btn==3)
+                % Three words, two-finger tap as my mac is configures.
+                % Need to fix this to take into account the right edge.
+                en = min(floor(Wb(2,word + 2) * M),SN);
+            else
+                % One word 
+                en = min(floor(Wb(2,word) * M),SN);
+            end
+            sound(w2(st:en),fs);
         end
-    end
+    end   
 
     function play_current(~,~)
         % phone = PH(int16(floor(y.IntersectionPoint(1))));
@@ -393,13 +427,13 @@ utterance_data(ui);
     
     function increment_frame(~,~)
         clf;
-        display_alignment(F1 + 50); 
+        display_alignment(F1 + 20); 
         add_buttons;
     end
 
     function decrement_frame(~,~)
         clf;
-        display_alignment(F1 - 50); 
+        display_alignment(F1 - 20); 
         add_buttons;
     end
 

@@ -15,9 +15,9 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3all.mat';
+    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
     tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1b.tok';
+    outfile = '/local/matlab/Kaldi-alignments-matlab/data/tmp.tok';
 end
  
 % Load sets dat to a structure. It has to be initialized first.
@@ -117,7 +117,7 @@ Fn = 0; PDF = 0;
 
 [~,tokmax] = size(To);
 [ostream,oerr] = fopen(outfile,'w');
-
+disp('hi');
 % Loop through tokens.
 for tok = 1:tokmax
     uid = Tu{tok};
