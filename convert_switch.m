@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bp_ne_func_two_n';
+    name = 'bp_ne_func_stsh';
 end
 
 datfile = 0;
@@ -150,12 +150,13 @@ switch name
     % Rewrite audio.
     audiodir = '/projects/speech/data/matlab-wav/bp_ne_func_two_n';
    case 'bp_ne_func_stsh' % Stress shift
-    alifile = [bpf '/Unigram_s5_NE_FUNC/exp/mono_aliWORD2/ali.all.gz']; 
-    wavscp = [bpf '/Unigram_s5_NE_FUNC/data/trainWORD2/wav.scp'];
-    model = [bpf '/Unigram_s5_NE_FUNC/exp/mono_aliWORD2/final.mdl'];
+    alifile = [bpf '/Unigram_s5_NE_FUNC/exp/mono_testStShWORD2/ali.all.gz']; 
+    wavscp = [bpf '/Unigram_s5_NE_FUNC/data/testStShWORD2/wav.scp'];
+    model = [bpf '/Unigram_s5_NE_FUNC/exp/mono_testStShWORD2/final.mdl'];
     phones = [bpf '/Unigram_s5_NE_FUNC/data/lang/phones.txt'];
-    transcript = [bpf '/Unigram_s5_NE_FUNC/data/trainWORD2/text'];
-    datbase = '/projects/speech/data/matlab-mat/bp_ne_func_nplus1';
+    transcript = [bpf '/Unigram_s5_NE_FUNC/data/testStShWORD2/text'];
+    datbase = '/projects/speech/data/matlab-mat/bp_ne_func_stsh';
+    audiodir = '/projects/speech/data/matlab-wav/bp_ne_func_stsh';
    otherwise
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/tri4b-e2.mat';
     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/rm_s5a1';

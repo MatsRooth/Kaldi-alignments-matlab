@@ -4,7 +4,6 @@ function display_token(tokenfile,datfile,framec,audiodir)
 
 % display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
 
-
 if nargin < 4
     audiodir = 0;
 end
@@ -20,9 +19,10 @@ if nargin < 1
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
     % tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
+    % 1836 tokens of SOME
     tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
     % Number of frames to display.
-    framec = 80;
+    framec = 160;
 end
 
 if nargin == 1
@@ -175,20 +175,19 @@ utterance_data(ui);
         F1 = max([1,min([Fn - framec,f])]);
         % End frame
         FN = min([F1 + framec, Fn]);
-        % sound(w,fs);
+        % Display the frame interval to terminal.
         disp([F1,FN])
         % First and last samples to display.
-        %S1 = floor(F1  * M); 
-        %SN = floor(FN * M);
         S1 = floor((F1 - 1) * M + 1); 
         SN = floor((FN - 1) * M - 1);
         % Range of samples to display.
         SR = S1:SN;
         
+        % Vertical scale for waveform.
         sk = 1.2 * max(abs(w));
-        
+        % Plot the waveform.
         plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
-
+        % Play the sound.
         sound(w(SR),fs);
         
         ya = 1.0;
@@ -196,7 +195,6 @@ utterance_data(ui);
         axis([S1/M, SN/M, -ya, ya]);
         AX = axis();
                
-
         % Draw subphone bars.
         % SU(N) subphone that the Nth frame is in.
         % SUstart(PH(p)) start of pth phone
@@ -237,8 +235,6 @@ utterance_data(ui);
            end
         end
 
- 
-        
         skf = max(fx);
         
         tt1 = tt(:,1);

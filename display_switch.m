@@ -2,7 +2,7 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'bp_ne_func_two_n';
+    name = 'bp_ne_func_stsh';
 end
 
 datfile = 0;
@@ -93,6 +93,10 @@ switch name
    case 'bp_ne_func_two_n' % ok
      datfile = '/projects/speech/data/matlab-mat/bp_ne_func_two_n.mat';
      audiodir = '/projects/speech/data/matlab-wav/bp_ne_func_two_n';
+     framec = 150; 
+   case 'bp_ne_func_stsh' % 
+     datfile = '/projects/speech/data/matlab-mat/bp_ne_func_stsh.mat';
+     audiodir = '/projects/speech/data/matlab-wav/bp_ne_func_stsh';
      framec = 150; 
     
    otherwise
