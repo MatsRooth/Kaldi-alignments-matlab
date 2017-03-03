@@ -93,6 +93,14 @@ switch name
     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3all';
+   case 'ls3mono100'  % This dates from 2015, check where it came from.
+    alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/mono2_ali_clean_100k/ali.1.gz';  % Preliminary, update it to all. 3597 utterances.
+    wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/train_clean_100/wav.scp';
+    model = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/mono2_ali_clean_100k/final.mdl';
+    phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/lang_nosp/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/train_clean_100/text';
+    datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100';
+    audiodir = 0; % Don't copy audio.  Create only ls3mono100.mat.
    case 'vm1a'
     alifile = '/projects/speech/sys/kaldi-master/egs/vm1_copy/exp/mono_ali/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-master/egs/vm1_copy/data/train/wav.scp';

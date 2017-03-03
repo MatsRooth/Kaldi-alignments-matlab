@@ -3,6 +3,7 @@ function display_token(tokenfile,datfile,framec,audiodir)
 % May need addpath('/local/matlab/voicebox')
 
 % display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+% display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
 
 if nargin < 4
     audiodir = 0;
@@ -18,7 +19,7 @@ if nargin < 1
     datfile = '/projects/speech/data/matlab-mat/ls3all.mat'; %All the 100k data.
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
-    % tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
+    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
     % 1836 tokens of SOME
     tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
     % Number of frames to display.
