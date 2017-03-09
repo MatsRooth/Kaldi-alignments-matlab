@@ -1,45 +1,18 @@
-function display_token(tokenfile,datfile,framec,audiodir)
-% The .mat file datfile is created with con
+function token_param(tokenfile,datfile,framec,audiodir)
 % May need addpath('/local/matlab/voicebox')
-
-% display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
-% display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
-% 3-syllable words in Librispeech monophone model:
-%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-
-% 4-syllable words
-% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-1020.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-2010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-
-if nargin < 4
-    audiodir = 0;
-end
-
-if nargin < 3
-    framec = 100;
-end
+ 
 
 
 % Default for demo.
 if nargin < 1
-    datfile = '/projects/speech/data/matlab-mat/ls3all.mat'; %All the 100k data.
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat'; % Monophone Librispeech.
     audiodir = 0; % Audio will be read using Kaldi.
-    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
-    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
-    % 1836 tokens of SOME
-    tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
+ 
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok'; % 3 syllable with 010 stress pattern.
     % Number of frames to display.
     framec = 160;
 end
-
-if nargin == 1
-    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
-    audiodir = 0; % Audio will be read using Kaldi.
-    tokenfile = ['/local/res/stress/datar/',tokenfile];
-    % Number of frames to display.
-    framec = 120;
-end
+ 
 
 % Load sets dat to a structure. It has to be initialized first.
 dat = 0;
@@ -309,6 +282,7 @@ utterance_data(ui);
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
        display_alignment(lft);
+       param();
     end
 
 
@@ -451,6 +425,27 @@ utterance_data(ui);
         ball = uicontrol('Callback',hall,'String','A','Position', [200 10 25 25]);
         euid = uicontrol('Callback',huid,'Style','edit','Position',[260 10 120 25]);
         %title([int2str(ui),' ',uid2],'FontSize',18);
+    end
+
+    function param
+      % Token word index
+      wrdi = To{ti};
+      disp(wrdi);
+      % Corresponding vector of token phone indices, e.g. 72:78
+      Phi = F(2,Wb(1,wrdi)):F(2,Wb(2,wrdi));
+      % Vector of phone types for the target word.
+      Pht = PX(Pb(1,Phi));
+      % Raw stress pattern of the token phones, including -1 for
+      % non-vowels.
+      Phstress = P.stress(Pht);
+      % Phones with stress marks, a logical array.
+      Phvow0 = Phstress >= 0;
+      % Token indices of vowels, e.g. [54,57,59].
+      % These are the guys we want parameters for.
+      vtok = Phi(Phvow0);
+      % Vector of durations in units of frames.
+      dur = Pb(2,vtok) - Pb(1,vtok);
+      disp(dur);
     end
 
 figure();

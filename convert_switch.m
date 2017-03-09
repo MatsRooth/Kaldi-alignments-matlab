@@ -94,7 +94,7 @@ switch name
     transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/ls3all';
    case 'ls3mono100'  % This dates from 2015, check where it came from.
-    alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/mono2_ali_clean_100k/ali.1.gz';  % Preliminary, update it to all. 3597 utterances.
+    alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/mono2_ali_clean_100k/ali.all.gz'; % 28539 utterances.
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/train_clean_100/wav.scp';
     model = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/exp/mono2_ali_clean_100k/final.mdl';
     phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/lang_nosp/phones.txt';
