@@ -1,49 +1,46 @@
-function display_token(tokenfile,datfile,framec,audiodir)
-% The .mat file datfile is created with con
-% May need addpath('/local/matlab/voicebox')
+function display_token_fea(tokenfile,datfile,feafile,framec,audiodir)
 
-% display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
-% display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
-% 3-syllable words in Librispeech monophone model:
-%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-
-% 4-syllable words
-% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-1020.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-2010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-
-% Tokens of NOT.  First one is the sanity check.
-% display_token('/local/res/stress/datar/NOTaa1.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
-
-if nargin < 4
-    audiodir = 0;
-end
-
-if nargin < 3
-    framec = 100;
-end
-
+% May need addpath('/local/matlab/kaldi-to-matlab')
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data.
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data, or 1/8 of it for 100a.
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
     % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
     % 1836 tokens of SOME
     % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok'; 
+    tokenfile = '/local/res/stress/data/cvc_WILL_IH1.tok'; 
+    % Should be in text format.
+    % likfile = '/local/res/stress/data/cvc_phone_THAT.lik';
+    % likfile = '/local/res/stress/data/cvc_word_delta_e3_t.ark';
+    feafile = '/local/res/stress/data/cvc_word_delta_WILL_t.ark';
     % Number of frames to display.
-    framec = 160;
+    framec = 40;
 end
 
-if nargin == 1
-    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
-    audiodir = 0; % Audio will be read using Kaldi.
-    tokenfile = ['/local/res/stress/datar/',tokenfile];
-    % Number of frames to display.
-    framec = 120;
+% display_token_fea('/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat','/local/res/stress/data/cvc_word_delta_WILL.ark','/local/res/stress/data/cvc_WILL_t.tok')
+
+% PDF ids we care about. These are zero-indexed.
+PDF0 = [94:96,100:102,22:24];
+% The same 1-indexed.
+% PDF1 = PDF0 + ones(1,9);
+PDF1 = 1:13;
+
+lik = readkalditfeatures(feafile);
+
+
+% Map extended uids to matrices of likes.
+Lmap = containers.Map();
+[~,ulmax] = size(lik.utt);
+for i = 1:ulmax
+    uid_phone = cell2mat(lik.utt(i));
+    Lmap(uid_phone) = cell2mat(lik.feature(i));
 end
+
+% Lmap('103-1240-0002-24-3') gives the matrix of likes for phone 103-1240-0002-24-3,
+% with frames as the column index and pdf ids (shifted by 1) as the row index.
+% size(Lmap('103-1240-0002-24-3')) => 127 4
 
 % Load sets dat to a structure. It has to be initialized first.
 dat = 0;
@@ -114,6 +111,11 @@ sR = 0; x1 = 0; xn = 0;
 positionVector1 = 0;
 positionVector2 = 0;
 
+% Variables related to the target word;
+ wrdi = 0; wrdi_fs = 0; wrdi_fe = 0;
+ Li1 = 0; Li2 = 0; Li3 = 0;
+ L1 = 0; L2 = 0; L3 = 0;
+ 
 % Pitch.
 % Return values for fxrapt.
 fx = 0; tt = 0; 
@@ -182,11 +184,18 @@ utterance_data(ui);
 
     function display_alignment(f)
         subplot('Position',positionVector1);
+        % Target word index
+        wrdi = To{ti};
+        % Frame start and end of the target word
+        wrdi_fs = Wb(1,wrdi);
+        wrdi_fe = Wb(2,wrdi);
         % f is the suggested start frame
         % Start frame
-        F1 = max([1,min([Fn - framec,f])]);
+        % F1 = max([1,min([Fn - framec,f])]);
+        F1 = wrdi_fs;
         % End frame
-        FN = min([F1 + framec, Fn]);
+        % FN = min([F1 + framec, Fn]);
+        FN = wrdi_fe + 3;
         % Display the frame interval to terminal.
         disp([F1,FN])
         % First and last samples to display.
@@ -206,7 +215,12 @@ utterance_data(ui);
         disp([S1/M, SN/M, -ya, ya]);
         axis([S1/M, SN/M, -ya, ya]);
         AX = axis();
-               
+        
+        % Draw gray frame bars
+        for k = F1:FN
+            line([k,k],[-ya,ya],'LineWidth',2.0,'Color',[0.9,0.9,0.9]);
+        end
+        
         % Draw subphone bars.
         % SU(N) subphone that the Nth frame is in.
         % SUstart(PH(p)) start of pth phone
@@ -281,36 +295,22 @@ utterance_data(ui);
             'PickableParts','all','FaceColor','b','FaceAlpha',0.02);
         
         title([int2str(ui),' ',uid2],'FontSize',18);
-        subplot('Position',positionVector2);
-        %v = v_ppmvu(w(SR),fs,'e'); 
-        %plot(v);
-        %figure;
-        %plot(tt3,fx3,'g*');
-        % rms amplitude
-        % rms2(signal, windowlength, overlap, zeropad)
-        windowlength = 200;
-        overlap = 100;
-        d2 = windowlength - overlap;
-
-        r = rms2(w(SR),windowlength,overlap,1);
-        [~,ssr] = size(SR);
-        x1 = SR(1)/M;
-        xn = SR(ssr)/M;
-        [~,sR] = size(r);
-        XR = (((1:sR)/sR) * (xn - x1)) + (ones(1,sR) * x1);
         
-        plot(XR,r);        
-        AX2 = axis();
-        AX2(1) = AX(1);
-        AX2(2) = AX(2);
-        axis(AX2);
+        % Plot the likes
+        subplot('Position',positionVector2);
+
+        % Likes for the target word
+        Li1 = Lmap([uid,'-',int2str(wrdi)]);
+        L1 = Li1(PDF1,:);
+        % axis([F1,FN,1,15]);
+        imagesc([zeros(13,1),L1,zeros(13,1)]);
         
         
     end
 
     function display_centered_alignment()
        wrdi = To{ti}; 
-       lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
+       lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - (framec / 2));
        disp(lft);
        display_alignment(lft);
     end
@@ -458,9 +458,11 @@ utterance_data(ui);
     end
 
 figure();
-positionVector1 = [0.05, 0.3, 0.9, 0.6];
+%positionVector1 = [0.05, 0.3, 0.9, 0.6];
+positionVector1 = [0.05, 0.5, 0.9, 0.3];
 subplot('Position',positionVector1)
-positionVector2 = [0.05, 0.1, 0.9, 0.15];
+% positionVector2 = [0.05, 0.1, 0.9, 0.15];
+positionVector2 = [0.05, 0.1, 0.9, 0.3];
 subplot(2,1,1);
 display_centered_alignment();
 add_buttons;      
