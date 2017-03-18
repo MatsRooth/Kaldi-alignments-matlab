@@ -4,45 +4,39 @@ function display_token_fea(tokenfile,datfile,feafile,framec,audiodir)
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data, or 1/8 of it for 100a.
-    audiodir = 0; % Audio will be read using Kaldi.
-    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
-    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
-    % 1836 tokens of SOME
-    % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
+    % This determines the token displayed by uid and word offset.
     tokenfile = '/local/res/stress/data/cvc_WILL_IH1.tok'; 
-    % Should be in text format.
-    % likfile = '/local/res/stress/data/cvc_phone_THAT.lik';
-    % likfile = '/local/res/stress/data/cvc_word_delta_e3_t.ark';
+    % Munged alignment and audio data.
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data, or 1/8 of it for 100a.
+    % Audio will be read using Kaldi.
+    audiodir = 0; 
+    % Cut delta features for just the word targets, with uids <uid>-k.
+    % Cmvn has been applied.
     feafile = '/local/res/stress/data/cvc_word_delta_WILL_t.ark';
     % Number of frames to display.
     framec = 40;
 end
 
+    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
+    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
+    % 1836 tokens of SOME
+    % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
+
 % display_token_fea('/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat','/local/res/stress/data/cvc_word_delta_WILL.ark','/local/res/stress/data/cvc_WILL_t.tok')
 
 % PDF ids we care about. These are zero-indexed.
-PDF0 = [94:96,100:102,22:24];
+% PDF0 = [94:96,100:102,22:24];
 % The same 1-indexed.
 % PDF1 = PDF0 + ones(1,9);
 PDF1 = 1:13;
 
-lik = readkalditfeatures(feafile);
+% Structure encoding the features for all tokens
+Fea = readkalditfeatures(feafile);
 
+% Map uid-k to matrix of features.
+Fmap = feature_map(Fea);
 
-% Map extended uids to matrices of likes.
-Lmap = containers.Map();
-[~,ulmax] = size(lik.utt);
-for i = 1:ulmax
-    uid_phone = cell2mat(lik.utt(i));
-    Lmap(uid_phone) = cell2mat(lik.feature(i));
-end
-
-% Lmap('103-1240-0002-24-3') gives the matrix of likes for phone 103-1240-0002-24-3,
-% with frames as the column index and pdf ids (shifted by 1) as the row index.
-% size(Lmap('103-1240-0002-24-3')) => 127 4
-
-% Load sets dat to a structure. It has to be initialized first.
+% Set dat to a structure. It has to be initialized before running load.
 dat = 0;
 load(datfile);
 
@@ -56,49 +50,21 @@ Align_phone = dat.align_phone;
 Align_phone_len = dat.phone_seq;
 Tra = dat.tra;
 
-
-
-% Cell array of uids for tokens.
-Tu = {};
-% Vector of word offsets for tokens.
-To = [];
-
-% Load the token data.
-% Running index.
-j = 1;
-token_stream = fopen(tokenfile);
-
-itxt = fgetl(token_stream);
-while ischar(itxt)
-    itxt = strtrim(itxt);
-    part = strsplit(itxt);
-    uid = part{1};
-    offset = str2num(part{2});
-    Tu{j} = uid;
-    To{j} = offset;   
-    itxt = fgetl(token_stream);
-    j = j + 1;
-end
-fclose(token_stream);
-
 % Given a token index j,
 %   Tu{j} is the uid for the token as a string. 
 %   To{j} is the word offset
- 
+[Tu,To] = token_data(tokenfile);
+
 % Index in Tu and To of token being displayed.
 ti = 1;
 % Corresponding index in Uid.
 ui = dat.um(Tu{ti});
  
-% Index in Uid and Align of the utterance being displayed.
-% ui = Tu
-
 % Maximum values for uid indices and token indices.
 [~,U] = size(Uid);
 [~,T] = size(Tu);
 
 % Initialize some variables.
-
 
 % Variables that are set in nested functions.
 uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; w2 = 0; fs = 0;
@@ -216,7 +182,8 @@ utterance_data(ui);
         axis([S1/M, SN/M, -ya, ya]);
         AX = axis();
         
-        % Draw gray frame bars
+        % Draw gray frame bars. Some bars are recolored in the
+        % subsequent steps.
         for k = F1:FN
             line([k,k],[-ya,ya],'LineWidth',2.0,'Color',[0.9,0.9,0.9]);
         end
@@ -300,7 +267,7 @@ utterance_data(ui);
         subplot('Position',positionVector2);
 
         % Likes for the target word
-        Li1 = Lmap([uid,'-',int2str(wrdi)]);
+        Li1 = Fmap([uid,'-',int2str(wrdi)]);
         L1 = Li1(PDF1,:);
         % axis([F1,FN,1,15]);
         imagesc([zeros(13,1),L1,zeros(13,1)]);
@@ -373,15 +340,20 @@ utterance_data(ui);
     end   
 
     function play_current(~,~)
-        % phone = PH(int16(floor(y.IntersectionPoint(1))));
-        % disp(sprintf('phone %d',phone));
-        %M = fs / 100;
-        %st = (PHstart(phone) - 1) * M;
-        %en = PHend(phone) * M;
+        % Play the sound snippet being displayed.
+        % SR is the range of samples being displayed.
         sound(w(SR),fs);
     end
 
+    function play_context(~,~)
+        % Play a bit more than what is being displayed.
+        st = max(1,SR(1) - (2 * fs));
+        en = min(length(w),SR(length(SR)) + fs);
+        sound(w(st:en),fs);
+    end
+
     function play_all(~,~)
+        % Play the entire utterance.
         sound(w,fs);
     end
 
@@ -495,3 +467,34 @@ add_buttons;
  
 end
 
+function Fmap = feature_map(Fea)
+    Fmap = containers.Map();
+    [~,ulmax] = size(Fea.utt);
+    for i = 1:ulmax
+        uid_phone = cell2mat(Fea.utt(i));
+        Fmap(uid_phone) = cell2mat(Fea.feature(i));
+    end
+end
+
+
+function [Tu,To] = token_data(tokenfile)
+    % Cell array of uids for tokens.
+    Tu = {};
+    % Vector of word offsets for tokens.
+    To = [];
+    j = 1;
+    token_stream = fopen(tokenfile);
+
+    itxt = fgetl(token_stream);
+    while ischar(itxt)
+        itxt = strtrim(itxt);
+        part = strsplit(itxt);
+        uid = part{1};
+        offset = str2num(part{2});
+        Tu{j} = uid;
+        To{j} = offset;   
+        itxt = fgetl(token_stream);
+        j = j + 1;
+    end
+    fclose(token_stream);
+end
