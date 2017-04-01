@@ -1,25 +1,19 @@
-function token_data(datfile,tokenfile,outfile)
-% Add some columns to a token file. The result looks like this.
-%103-1240-0044-V	12	321	333	WILLih1	WAH0L
-%103-1240-0050-V	35	924	935	WILLih1	WAH0L
-%103-1240-0054-V	43	1273	1295	WILLih1	WIH1L
-%103-1241-0031-V	27	687	711	WILLih1	WAH0L
-%   uid, offset, frame start, frame end, word form
-
-% This program is pretty fast, even though it loads a lot into memory.
-if nargin < 4
-    audiodir = 0;
-end
+function token_data_bpn(datfile,tokenfile,outfile,framec)
+% Add some columns to a token file. The input currently looks like this,
+% from Simone's Perl code.  Additional columns will be added.
+% f13br16b22k1	s001	1	este	e1 s ch i
+% f13br16b22k1	s001	2	indiv??duo	in dj i v i1 d uw
+% f13br16b22k1	s001	3	assiste	a1 s i s ch i
 
 if nargin < 3
     framec = 100;
 end
-
-% Default for demo.
+        
+% BP one-of-n stress data.
 if nargin < 1
-    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok';
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/tmp.tok';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.mat';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/rawTokenAliTable.txt'; % 40007 word tokens
+    outfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.tok';
 end
  
 % Load sets dat to a structure. It has to be initialized first.
@@ -42,6 +36,12 @@ Tra = dat.tra;
 Tu = {};
 % Vector of word offsets for tokens.
 To = [];
+% Cell array of prompt ids.
+Pr = {};
+% Cell array of speaker ids.
+Spkr = {};
+% All of the fields
+Part = {};
 
 % Load the token data.
 % Running index.
@@ -51,11 +51,17 @@ token_stream = fopen(tokenfile);
 itxt = fgetl(token_stream);
 while ischar(itxt)
     itxt = strtrim(itxt);
-    part = strsplit(itxt);
-    uid = part{1};
-    offset = str2num(part{2});
+    part = strsplit(itxt,'\t');
+    prompt = part{1};
+    spkr = part{2};
+    % Need this for looking up stuff in dat.
+    uid = [prompt,'-',spkr];
+    offset = str2num(part{3});
     Tu{j} = uid;
     To{j} = offset;   
+    Pr{j} = prompt;
+    Spkr{j} = spkr;
+    Part{j} = part;
     itxt = fgetl(token_stream);
     j = j + 1;
 end
@@ -65,7 +71,7 @@ fclose(token_stream);
 %   Tu{j} is the uid for the token as a string. Why not an index?
 %   To{j} is the word offset
  
-% Index in Tu and To of token being displayed.
+% Index in Tu and To of token being analyzed.
 ti = 1;
 % Corresponding index in Uid.
 ui = dat.um(Tu{ti});
@@ -122,10 +128,14 @@ Fn = 0; PDF = 0;
 disp('hi');
 % Loop through tokens.
 for tok = 1:tokmax
-    uid = Tu{tok};
-    ui = dat.um(Tu{tok});
-    utterance_data(ui);
-    j = To{tok};
+    uid = Tu{tok};  % uid like f60br08b11k1-s006
+    j = To{tok};   % offset of target word
+    if (isempty(j)) % Sometimes the offset field is missing.
+        continue;  
+    end
+    ui = dat.um(uid);   % utterance index in dat
+    utterance_data(ui); % load utterance data
+    
     word = tra{j};
 
     % First and last frames indices for the word token
@@ -134,15 +144,39 @@ for tok = 1:tokmax
     % The range of phone indices for the word is p1:p2.
     p1 = F(2,fr1);
     p2 = F(2,fr2);
+    
+    % Array of phone spellings.
+    ps = P.inds2shortphones(PX(Pb(1,p1:p2)));
+    
+    % Boolean indices of vowels
+    vi = ~cellfun(@isempty,regexp(ps,'[aeiou]','match'));
+    
+    % Vowels
+    vs = ps(vi);
+    
     % The spelling of the word in localized phones, 
     % e.g.     'd_B'    'ax_I'    'z_E'
     % Spelling of the word in short phones.
-    short_spelling = strjoin(P.inds2shortphones(PX(Pb(1,p1:p2))));
+    % short_spelling = strjoin(P.inds2shortphones(PX(Pb(1,p1:p2))));
+    short_spelling = strjoin(ps);
     %fprintf('%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));
     fprintf(ostream,'%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,short_spelling);
 end
  
 fclose('all');
  
+end
+
+function n = stress_to_numerical(x)
+    switch x
+        case 'ult'
+            n = 1;
+        case 'penult'
+            n = 2;
+        case 'antepenult'
+            n = 3;
+        otherwise
+            n = 0;
+    end
 end
 

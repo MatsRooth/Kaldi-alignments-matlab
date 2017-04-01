@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bp_ne_func_stsh';
+    name = 'bpn';
 end
 
 datfile = 0;
@@ -20,6 +20,15 @@ bpf = '/Volumes/F/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint';
 % The result stores the complete pathname of the audio 
 
 switch name
+    case 'bpn'
+     % n stress disambiguation
+     % This converts without re-writing audio.
+     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/ali.all.gz';  
+     wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/wav.scp';
+     model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/final.mdl';
+     phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/lang/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/text';
+     datbase = '/local/matlab/Kaldi-alignments-matlab/data/bpn';
    case 'bp3'
      % This converts without re-writing audio.
      alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/exp/mono_aliWORD2/ali.all.gz'; 
