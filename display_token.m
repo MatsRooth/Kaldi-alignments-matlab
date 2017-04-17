@@ -12,6 +12,9 @@ function display_token(tokenfile,datfile,framec,audiodir)
 % display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-1020.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
 % display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-2010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
 
+% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
+% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/alguma2.wrd.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
+
 % Tokens of NOT.  First one is the sanity check.
 % display_token('/local/res/stress/datar/NOTaa1.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
 
@@ -62,9 +65,13 @@ Tra = dat.tra;
 
 
 % Cell array of uids for tokens.
+% Indexing and the below corresonds to line numbers in the token file.
 Tu = {};
 % Vector of word offsets for tokens.
 To = [];
+% All of the fields. The token file has a variable number of columns
+% with properties of the token.
+Pa = {};
 
 % Load the token data.
 % Running index.
@@ -78,7 +85,9 @@ while ischar(itxt)
     uid = part{1};
     offset = str2num(part{2});
     Tu{j} = uid;
-    To{j} = offset;   
+    To{j} = offset;
+    % Store all of the fields.
+    Part{j} = part;
     itxt = fgetl(token_stream);
     j = j + 1;
 end
@@ -288,8 +297,9 @@ utterance_data(ui);
         %plot(tt3,fx3,'g*');
         % rms amplitude
         % rms2(signal, windowlength, overlap, zeropad)
-        windowlength = 200;
-        overlap = 100;
+        % These values give smooth plot. Used to be 200 100.
+        windowlength = 400;
+        overlap = 200;
         d2 = windowlength - overlap;
 
         r = rms2(w(SR),windowlength,overlap,1);
@@ -312,6 +322,8 @@ utterance_data(ui);
        wrdi = To{ti}; 
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
+       % Display the fields from the token file to the command window.
+       disp(Pa{ti});
        display_alignment(lft);
     end
 
@@ -361,9 +373,9 @@ utterance_data(ui);
             M = fs / 100;
             st = max(1,floor((Wb(1,word) - 1) * M));
             if (btn==3)
-                % Three words, two-finger tap as my mac is configures.
+                % Two words, two-finger tap as my mac is configures.
                 % Need to fix this to take into account the right edge.
-                en = min(floor(Wb(2,word + 2) * M),SN);
+                en = min(floor(Wb(2,word + 1) * M),SN);
             else
                 % One word 
                 en = min(floor(Wb(2,word) * M),SN);

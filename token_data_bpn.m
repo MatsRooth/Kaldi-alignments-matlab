@@ -1,21 +1,33 @@
 function token_data_bpn(datfile,tokenfile,outfile,framec)
-% Add some columns to a token file. The input currently looks like this,
-% from Simone's Perl code.  Additional columns will be added.
-% f13br16b22k1	s001	1	este	e1 s ch i
-% f13br16b22k1	s001	2	indiv??duo	in dj i v i1 d uw
-% f13br16b22k1	s001	3	assiste	a1 s i s ch i
+% Add some columns to a BP stress token file, as follows.
+%m67br08b11k1-s001	5	2	1	1	322	377	3 23	9 3 10 23 11	demais2	dj i m aj1 s
+%m67br08b11k1-s001	
+%5  word offset	
+%2	number of vowels
+%1	lexical stress
+%1	recognized stress
+%322  frame start
+%377  frame end
+%3 23 list of vowel lengths, in frames
+%9 3 10 23 11 list of phone lengths, in frames
+%demais2	word form
+%dj i m aj1 s  recognized phone spelling
 
 if nargin < 3
     framec = 100;
 end
         
-% BP one-of-n stress data.
+% The default argument is the BP one-of-n stress data.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.mat';
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/rawTokenAliTable.txt'; % 40007 word tokens
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.tok';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat';
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/rawTokenAliTable.txt'; % 40007 word tokens
+    outfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.tok';
 end
- 
+
+% To inspect the result, run display_token, clicking on words and phones to
+% check properties.
+%  display_token('/local/matlab/Kaldi-alignments-matlab/data/bpn.tok','/local/matlab/Kaldi-alignments-matlab/data/bpn.mat')
+
 % Load sets dat to a structure. It has to be initialized first.
 dat = 0;
 load(datfile);
@@ -124,10 +136,13 @@ Fn = 0; PDF = 0;
     end
 
 [~,tokmax] = size(To);
-[ostream,oerr] = fopen(outfile,'w');
+% Write in utf-8. When examining the result in an OSX term,
+% set the character encoding to utf-8 in Preferences>Advanced.
+[ostream,oerr] = fopen(outfile,'w','native', 'UTF-8');
 disp('hi');
 % Loop through tokens.
-for tok = 1:tokmax
+for tok = 1:tokmax  
+%for tok = 1:100
     uid = Tu{tok};  % uid like f60br08b11k1-s006
     j = To{tok};   % offset of target word
     if (isempty(j)) % Sometimes the offset field is missing.
@@ -145,22 +160,50 @@ for tok = 1:tokmax
     p1 = F(2,fr1);
     p2 = F(2,fr2);
     
-    % Array of phone spellings.
+    % Array of phone spellings, cell array such as {'e1','s','ch','i'}.
     ps = P.inds2shortphones(PX(Pb(1,p1:p2)));
     
-    % Boolean indices of vowels
+    % Boolean indices of vowels, e.g. [1,0,0,1].
     vi = ~cellfun(@isempty,regexp(ps,'[aeiou]','match'));
     
-    % Vowels
+    % Vowels, cell array such as {'e1','i'}.
     vs = ps(vi);
+    
+    % Lexical citation stress, 2 (penultimate) for eschi
+    c_stress = stress_to_numerical(Part{tok}{8});
+    
+    % Realized stress pattern as a 1xn logical array, e.g. [1,0]. 
+    r_stress_pattern = ~cellfun(@isempty,regexp(vs,'[1]','match'));
+    
+    % Realized stress in numerical form.
+    r_stress = min(find(fliplr(r_stress_pattern)));
+    
+    % Realized stress class counting from the end, e.g. 2 means
+    % penultimate.
+    
+    % Vector of phone durations for the token. p1:p2 is the range of phone
+    % indices in the word. Unit is frames. For example [17,9,8,13].
+    pdur = (Pb(2,p1:p2) - Pb(1,p1:p2)) + 1;
+    
+    
+    % Durations of the vowels.
+    vdur = pdur(vi);
     
     % The spelling of the word in localized phones, 
     % e.g.     'd_B'    'ax_I'    'z_E'
     % Spelling of the word in short phones.
     % short_spelling = strjoin(P.inds2shortphones(PX(Pb(1,p1:p2))));
     short_spelling = strjoin(ps);
-    %fprintf('%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,cell2mat(trim_phones(spelling)));
-    fprintf(ostream,'%s\t%i\t%i\t%i\t%s\t%s\n',uid,j,fr1,fr2,word,short_spelling);
+     
+    % Example of fields:
+    %   m08br16b22k1-s001 uid
+    %   1 word offset
+    %   2 vowel cound
+    %   69 frame start
+    %   119 frame end 
+    % fprintf(ostream
+    fprintf(ostream,'%s\t%i\t%i\t%i\t%i\t%i\t%i\t%s\t%s\t%s\t%s\n',uid,j,length(vs),c_stress,r_stress,fr1,fr2,strtrim(sprintf(' %i',vdur)),strtrim(sprintf(' %i',pdur)),word,short_spelling);
+    % disp('hi mom');
 end
  
 fclose('all');
@@ -179,4 +222,5 @@ function n = stress_to_numerical(x)
             n = 0;
     end
 end
+
 
