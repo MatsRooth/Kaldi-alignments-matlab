@@ -2,7 +2,7 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'bpn';
+    name = 'ls3mono100';
 end
 
 datfile = 0;

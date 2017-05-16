@@ -4,6 +4,7 @@ function display_token(tokenfile,datfile,framec,audiodir)
 
 % display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
 % display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+% display_token('/local/res/stress/datar/CANae1_AE1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
 % 3-syllable words in Librispeech monophone model:
 %    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
 %    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
@@ -13,7 +14,7 @@ function display_token(tokenfile,datfile,framec,audiodir)
 % display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-2010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
 
 % display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
-% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/alguma2.wrd.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
+% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/word/alguma2.wrd.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
 
 % Tokens of NOT.  First one is the sanity check.
 % display_token('/local/res/stress/datar/NOTaa1.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
@@ -29,13 +30,13 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data.
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat'; %All the 100k data.
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
     % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
     % 1836 tokens of SOME
     % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok'; 
+    tokenfile =  '/local/res/stress/datar/CANae1_AE1.tok' 
     % Number of frames to display.
     framec = 160;
 end
@@ -126,6 +127,10 @@ positionVector2 = 0;
 % Pitch.
 % Return values for fxrapt.
 fx = 0; tt = 0; 
+
+% Return values for fxpfac.
+fx2 = 0; pv2 = 0;
+
 % Version of tt with frame indexing.
 ttf = 0;
 % ttf and fx restricted to the frames being displayed.
@@ -169,6 +174,19 @@ utterance_data(ui);
         [~,nframe] = size(F);
         % pitch
         [fx,tt]=fxrapt(w,fs);
+        
+        % pitch via fxpefax
+        tinc = 0.01;
+        [fx2a,tx2a,pv2a,fv2a] = fxpefac(w,fs,tinc);
+        % Frame version of the time vector tx2.
+        tx2b = ceil(tx2a .* (fs / M))';
+        % Frame indexed probability of voicing.
+        pv2 = ones(1,nframe) * NaN;
+        pv2(tx2b) = pv2a;
+        % Frame indexed pitch.
+        fx2 = ones(1,nframe) * NaN;
+        fx2(tx2b) = fx2a;
+        
     end
 
     % Range of samples being displayed, this is global.
@@ -265,12 +283,11 @@ utterance_data(ui);
         
         hold;
         plot(tt3,fx3,'*');
-        
-        %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
 
+        % Plot probability of voicing
+        % plot(F1:FN, pv2(F1:FN),'o','MarkerFaceColor',[0.9 0.9 0]);
+        plot(F1:FN, pv2(F1:FN),'o','color',[0.7 0.7 0]);
         
-        
-         
         pp = patch([F1,FN,FN,F1],[0,0,ya,ya],'g');
         ps = patch([F1,FN,FN,F1],[0,0,-0.7 * ya,-0.7 * ya],'r' );
         pw = patch([F1,FN,FN,F1],[-0.7 * ya,-0.7 * ya,-ya,-ya],'g' );
@@ -323,7 +340,7 @@ utterance_data(ui);
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
        % Display the fields from the token file to the command window.
-       disp(Pa{ti});
+       %disp(Pa{ti});
        display_alignment(lft);
     end
 
