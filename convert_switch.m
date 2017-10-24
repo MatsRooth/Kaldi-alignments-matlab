@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bpn';
+    name = 'bpnf';
 end
 
 datfile = 0;
@@ -23,12 +23,25 @@ switch name
     case 'bpn'
      % n stress disambiguation
      % This converts without re-writing audio.
-     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/ali.all.gz';  
+     % With ali.1.gz this is 1/4 of the data, 1971 utterances.
+     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/ali.1.gz';  
      wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/wav.scp';
      model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/exp/mono_aliWORD2/final.mdl';
      phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/lang/phones.txt';
      transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/Unigr_s5_NLex/data/trainWORD2/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/bpn';
+     datbase = '/projects/speech/data/matlab-mat/bpn';
+    case 'bpnf'
+    % n stress disambiguation, final version
+    % This converts without re-writing audio.
+    % 
+     % alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali1N/ali.1.gz';  
+     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali1N/ali.all.gz';
+     wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/test1N/wav.scp';
+     model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali1N/final.mdl';
+     phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/lang/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/test1N/text';
+     % bpnf1 is the first 1/4
+     datbase = '/projects/speech/data/matlab-mat/bpnf';
    case 'bp3'
      % This converts without re-writing audio.
      alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/exp/mono_aliWORD2/ali.all.gz'; 

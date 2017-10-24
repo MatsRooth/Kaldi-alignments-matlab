@@ -6,7 +6,8 @@ function display_ali_with_token3(datfile,audiodir,tokenfile,framec)
 if nargin < 2
     audiodir = 0;
 end
-
+% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/word/dormit?rios2.wrd.tok',150);
+% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/prompt/s001.tok',150);
 if nargin < 1
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat';
     audiodir = 0;

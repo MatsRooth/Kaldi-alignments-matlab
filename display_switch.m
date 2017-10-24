@@ -2,8 +2,7 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'ls3mono100';
-end
+    name = 'bpnf';
 
 datfile = 0;
 audiodir = 0;
@@ -24,8 +23,16 @@ switch name
      datfile = [datbase '/' name '.mat'];
      audiodir = [audiobase '/' name];
      framec = 150;
+   case 'bp_ne_func_stsh'
+     datfile = [datbase '/' name '.mat'];
+     audiodir = 0;
+     framec = 150;
    case 'bpn'
      datfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.mat';
+     audiodir = 0;
+     framec = 150;
+   case 'bpnf'
+     datfile = '/projects/speech/data/matlab-mat/bpnf';
      audiodir = 0;
      framec = 150;
    case 'bp3' % ok
