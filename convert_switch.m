@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bpnf';
+    name = 'bp0V';
 end
 
 datfile = 0;
@@ -17,7 +17,8 @@ datdir = '/projects/speech/data/matlab-mat';
 bpf = '/Volumes/F/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint';
 
 % If audiodir is not specified, then audio is not converted and copied.
-% The result stores the complete pathname of the audio 
+% The result stores the complete pathname of the audio --
+% make sure canonical pathnames are in use.
 
 switch name
     case 'bpn'
@@ -42,6 +43,18 @@ switch name
      transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/test1N/text';
      % bpnf1 is the first 1/4
      datbase = '/projects/speech/data/matlab-mat/bpnf';
+   case 'bp0V'
+    % Aligned from start without stress.
+    % See data/train0V and exp/mono_ali0V
+    % This converts without rewriting audio.
+     % alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali0V/ali.1.gz';  
+     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali0V/ali.all.gz';
+     wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/train0V/wav.scp';
+     model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/exp/mono_ali0V/final.mdl';
+     phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/lang/phones.txt';
+     transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Final/data/train0V/text';
+     % bpnf1 is the first 1/4
+     datbase = '/projects/speech/data/matlab-mat/bp0V';
    case 'bp3'
      % This converts without re-writing audio.
      alifile = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/exp/mono_aliWORD2/ali.all.gz'; 

@@ -2,7 +2,7 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'bpnf';
+    name = 'bp0V';
 
 datfile = 0;
 audiodir = 0;
@@ -33,6 +33,14 @@ switch name
      framec = 150;
    case 'bpnf'
      datfile = '/projects/speech/data/matlab-mat/bpnf';
+     audiodir = 0;
+     framec = 150;
+   case 'bp0V'
+     datfile = '/projects/speech/data/matlab-mat/bp0V';
+     audiodir = 0;
+     framec = 150;
+   case 'bp0V'
+     datfile = '/projects/speech/data/matlab-mat/bp0V';
      audiodir = 0;
      framec = 150;
    case 'bp3' % ok
