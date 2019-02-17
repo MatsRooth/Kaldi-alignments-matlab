@@ -1,6 +1,8 @@
-function display_token(tokenfile,datfile,framec,audiodir)
+function display_token(tokenfile,datfile,framec,audiodir,uidflag)
 % The .mat file datfile is created with con
 % May need addpath('/local/matlab/voicebox')
+
+% word=1 indicates that the the offset is part of the uid
 
 % display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
 % display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
@@ -30,13 +32,16 @@ end
 
 % Default for demo.
 if nargin < 1
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat'; %All the 100k data.
+    % datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat'; %All the 100k data.
+    datfile = '/projects/speech/data/matlab-mat/bp0V.mat';
+    tokenfile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/bpw2/exp/u1/decode_word_1/tab4-long-err';
+    uidflag = 1;
     audiodir = 0; % Audio will be read using Kaldi.
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
     % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
     % 1836 tokens of SOME
     % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
-    tokenfile =  '/local/res/stress/datar/CANae1_AE1.tok' 
+    % tokenfile =  '/local/res/stress/datar/CANae1_AE1.tok' 
     % Number of frames to display.
     framec = 160;
 end
@@ -82,9 +87,20 @@ token_stream = fopen(tokenfile);
 itxt = fgetl(token_stream);
 while ischar(itxt)
     itxt = strtrim(itxt);
-    part = strsplit(itxt);
-    uid = part{1};
-    offset = str2num(part{2});
+    if (uidflag == 1)
+        part = strsplit(itxt);
+        part2 = strsplit(part{1},'-');
+        offset = str2num(part2{length(part2)});
+        part3 = part2(2:(length(part2) - 1));
+        part3 = part3';
+        part3 = sprintf("-%s",part3{:});
+        uid = sprintf("%s%s",part2{1},part3);
+        uid = uid{1,1};
+    else
+        part = strsplit(itxt);
+        uid = part{1};
+        offset = str2num(part{2});
+    end
     Tu{j} = uid;
     To{j} = offset;
     % Store all of the fields.
@@ -95,8 +111,10 @@ end
 fclose(token_stream);
 
 % Given a token index j,
-%   Tu{j} is the uid for the token as a string. 
+%   Tu{j} is the uid for the token as a string, e.g. 'f01br16b22k1-s001'.
 %   To{j} is the word offset
+%   Part{j} has the fields of the token file.  Part{j}{6} is the word form,
+%   e.g. 'este0V'.
  
 % Index in Tu and To of token being displayed.
 ti = 1;
@@ -306,7 +324,8 @@ utterance_data(ui);
         set(pw,'ButtonDownFcn',hwp,... 
             'PickableParts','all','FaceColor','b','FaceAlpha',0.02);
         
-        title([int2str(ui),' ',uid2],'FontSize',18);
+        %title([int2str(ui),' ', uid2, ' ', Part{To{ti}}{6}],'FontSize',18);
+        title([int2str(ui),' ', uid2, ' ', tra{To{ti}}],'FontSize',18);
         subplot('Position',positionVector2);
         %v = v_ppmvu(w(SR),fs,'e'); 
         %plot(v);

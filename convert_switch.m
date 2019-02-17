@@ -7,7 +7,7 @@ function datfile = convert_switch(name)
 % The result is used with
 
 if (nargin < 1)
-    name = 'bp0V';
+    name = 'spanish1b';
 end
 
 datfile = 0;
@@ -151,6 +151,14 @@ switch name
     transcript = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-jms852/data/train/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/spanish1a';
     audiodir = '/projects/speech/data/matlab-wav/spanish1a';
+   case 'spanish1b'
+    alifile = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex/exp/mono_ali/ali.1.gz';
+    wavscp = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex-mr249/data/train/wav2.scp';
+    model = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex/exp/mono_ali/final.mdl';
+    phones = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex/data/lang/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex/data/train/text';
+    datbase = '/local/matlab/Kaldi-alignments-matlab/data/spanish1b';
+    audiodir = '/projects/speech/data/matlab-wav/spanish1b';
    case 'korean1a'
     alifile = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/exp/mono_ali/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/wav-uid.scp';

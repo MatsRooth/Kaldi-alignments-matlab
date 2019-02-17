@@ -20,9 +20,15 @@ end
 % The default argument is the BP one-of-n stress data.
 if nargin < 1
     datfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat';
-    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/rawTokenAliTable.txt'; % 40007 word tokens
+    tokenfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/rawTokenAliTable.txt'; % 40007 word tokens, Simone's decoding, but with some bugs.
     outfile = '/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.tok';
 end
+
+% 0V
+% Need to check that this does not illegitimately take info from
+% /local/matlab/Kaldi-alignments-matlab/data-bpn/rawTokenAliTable.txt'.
+% token_data_bpn('/projects/speech/data/matlab-mat/bp0V.mat','/local/matlab/Kaldi-alignments-matlab/data-bpn/rawTokenAliTable.txt','/local/matlab/Kaldi-alignments-matlab/data-bpn/bp0V.tok')
+% This yields 37040, too few.
 
 % To inspect the result, run display_token, clicking on words and phones to
 % check properties.
@@ -146,7 +152,7 @@ for tok = 1:tokmax
     uid = Tu{tok};  % uid like f60br08b11k1-s006
     j = To{tok};   % offset of target word
     if (isempty(j)) % Sometimes the offset field is missing.
-        continue;  
+        continue;  % This is causing missing tokens.
     end
     ui = dat.um(uid);   % utterance index in dat
     utterance_data(ui); % load utterance data
@@ -207,7 +213,6 @@ for tok = 1:tokmax
 end
  
 fclose('all');
- 
 end
 
 function n = stress_to_numerical(x)
