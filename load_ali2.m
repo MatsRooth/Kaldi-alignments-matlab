@@ -39,14 +39,14 @@ basic_stream = fopen(basic_ali);
 % Probability density ids.
 % For each frame, the id of the pdf used for it.
 pdf_ali = '/tmp/align3_pdf_ali.txt';
-cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-pdf ', model, ' ark,t:- ark,t:- >', pdf_ali];
+cmd = ['gzcat ', alifile, ' | /projects-old/speech/sys/kaldi-trunk/src/bin/ali-to-pdf ', model, ' ark,t:- ark,t:- >', pdf_ali];
 system(cmd);
 pdf_stream = fopen(pdf_ali);
 
 % Phones.
 % For each frame, the numerical phone it is in.
 phone_ali = '/tmp/align3_phone_ali.txt';
-cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones  --per-frame ', model, ' ark,t:- ark,t:- >', phone_ali];
+cmd = ['gzcat ', alifile, ' | /projects-old/speech/sys/kaldi-trunk/src/bin/ali-to-phones  --per-frame ', model, ' ark,t:- ark,t:- >', phone_ali];
 disp(cmd);
 system(cmd);
 phone_stream = fopen(phone_ali);
@@ -56,7 +56,7 @@ phone_stream = fopen(phone_ali);
  
 phone_seq = '/tmp/align3_phone_seq.txt';
 % --write-lengths
-cmd = ['gzcat ', alifile, ' | /projects/speech/sys/kaldi-trunk/src/bin/ali-to-phones --write-lengths ', model, ' ark,t:- ark,t:- >', phone_seq];
+cmd = ['gzcat ', alifile, ' | /projects-old/speech/sys/kaldi-trunk/src/bin/ali-to-phones --write-lengths ', model, ' ark,t:- ark,t:- >', phone_seq];
 disp(cmd);
 system(cmd);
 phone_seq_stream = fopen(phone_seq);

@@ -2,9 +2,10 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'korean1b';
-end
-    
+    % name = 'etri10k'; % ETRI
+    % name = 'korean1a'; % basic
+    name = 'seoul_10k';
+
 datfile = 0;
 audiodir = 0;
 %audiobase = '/projects/speech/data/matlab-wav';
@@ -13,7 +14,7 @@ audiobase = 'matlab-wav';
 datbase =  '/projects/speech/data/matlab-mat';
 
 framec = 150;
-     
+
 switch name
    % ok
    case 'shruti1'
@@ -29,15 +30,23 @@ switch name
      audiodir = 0;
      framec = 150;
    case 'bpn'
-     datfile = '/projects/speech/data/matlab-mat/bpn.mat';
+     datfile = '/local/matlab/Kaldi-alignments-matlab/data/bpn.mat';
      audiodir = 0;
      framec = 150;
    case 'bpnf'
      datfile = '/projects/speech/data/matlab-mat/bpnf';
      audiodir = 0;
-     framec = 90;
+     framec = 150;
    case 'bp0V'
      datfile = '/projects/speech/data/matlab-mat/bp0V';
+     audiodir = 0;
+     framec = 150;
+   case 'bp0SZ'
+     datfile = '/projects/speech/data/matlab-mat/bp0SZ';
+     audiodir = 0;
+     framec = 150;
+   case 'bp1SZ'
+     datfile = '/projects/speech/data/matlab-mat/bp1SZ';
      audiodir = 0;
      framec = 150;
    case 'bp3' % ok
@@ -83,17 +92,20 @@ switch name
      audiodir = 0;
      framec = 100; 
    case 'korean1a'
-    datfile = '/projects/speech/korean1a.mat';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/korean1a.mat';
     audiodir = 0;
     framec = 150;
-   case 'korean2'
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/korean2.mat';
+    status ="Oct 25 2018";
+   case 'korean2' % This has the initial and medial consonants.
+    datfile = '/projects/speech/data/matlab-mat/korean2.mat';
     audiodir = 0;
     framec = 150;
+    status ="Mar 13 2019";
    case 'korean1b'
     datfile = '/projects/speech/data/matlab-mat/korean1b.mat';
     audiodir = '/projects/speech/data/matlab-wav/korean1b';
     framec = 150;
+    status ="Feb 17 2019";
    case 'spanish1a'
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/spanish1a.mat';
     audiodir = '/projects/speech/data/matlab-wav/spanish1a';
@@ -102,10 +114,14 @@ switch name
     datfile = '/local/matlab/Kaldi-alignments-matlab/data/spanish1b.mat';
     audiodir = '/projects/speech/data/matlab-wav/spanish1b';
     framec = 150;
+   case 'seoul_10k'
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/seoul_10k.mat';
+    audiodir = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/wav';
+    framec = 100;
    case 'etri10k' % ok
-     datfile = [datbase '/' name '.mat'];
-     audiodir = '/Volumes/D/projects/speech/data/matlab-wav/etri10k';
-     framec = 100;  
+     datfile = '/local/matlab/Kaldi-alignments-matlab/data/etri10k.mat';
+     audiodir = '/local/tmp/etri10k';
+     framec = 150;  
    case 'bp_ne_func_nplus1' % ok
      datfile = '/projects/speech/data/matlab-mat/bp_ne_func_nplus1.mat';
      audiodir = '/projects/speech/data/matlab-wav/bp_ne_func_nplus1';
@@ -129,8 +145,6 @@ switch name
     framec = 150;
 end
 
-disp(datfile);
-disp(audiodir);
 
 if (audiodir == 0)
     display_ali3(datfile,framec);

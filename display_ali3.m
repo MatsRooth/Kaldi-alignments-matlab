@@ -123,7 +123,7 @@ utterance_data(ui);
         
         plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
 
-        sound(w(SR),fs);
+        soundsc(w(SR),fs);
         
         ya = 1.0;
         disp([S1/M, SN/M, -ya, ya]);
@@ -239,7 +239,7 @@ utterance_data(ui);
         % Use floor to get an integer.
         st = max(1,floor((Sb(1,subphone) - 1) * M));
         en = min(floor(Sb(2,subphone) * M),SN);
-        sound(w(st:en),fs);
+        soundsc(w(st:en),fs);
     end
 
     function phoneplay(~,y)
@@ -251,7 +251,7 @@ utterance_data(ui);
         % Use floor to get an integer.
         st = max(1,floor((Pb(1,phone) - 1) * M));
         en = min(floor(Pb(2,phone) * M),SN);
-        sound(w(st:en),fs);
+        soundsc(w(st:en),fs);
     end
 
     function wordplay(x,y)
@@ -273,7 +273,8 @@ utterance_data(ui);
             else
                 en = min(floor(Wb(2,word) * M),SN);
             end
-            sound(w2(st:en),fs);
+            %sound(w2(st:en),fs);
+            soundsc(w2(st:en),fs);
         end
     end
 
@@ -283,11 +284,11 @@ utterance_data(ui);
         %M = fs / 100;
         %st = (PHstart(phone) - 1) * M;
         %en = PHend(phone) * M;
-        sound(w(SR),fs);
+        soundsc(w(SR),fs);
     end
 
     function play_all(~,~)
-        sound(w,fs);
+        soundsc(w,fs);
     end
 
     function next_utterance(~,~)
