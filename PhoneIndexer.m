@@ -120,11 +120,12 @@ function n = stress(p)
 end
 
 function p2 = trim_phone(p)
-    % Remove the part of phone symbol p after '_'.
+    % Remove the part of phone symbol p after the last '_'.
     %p = p{1};
     p2 = p;
-    loc = strfind(p,'_');
+    loc = fliplr(strfind(p,'_'));
     if loc
+        loc = loc(1);
         p2 = p2(1:(loc - 1));
     end
 end

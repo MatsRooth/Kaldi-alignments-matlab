@@ -184,6 +184,14 @@ switch name
     transcript = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/seoul_10k';
     audiodir = 0;
+    case 'seoul_10k2'
+    alifile = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/ali.2.gz';
+    wavscp = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/pword-wav.scp';
+    model = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/final.mdl';
+    phones = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/lang/phones.txt';
+    transcript = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/text';
+    datbase = '/local/matlab/Kaldi-alignments-matlab/data/seoul_10k2';
+    audiodir = 0;
    case 'korean1a'
     alifile = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/exp/mono_ali/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/wav-uid.scp';
