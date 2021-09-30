@@ -4,11 +4,10 @@ function datfile = convert_switch(name)
 % in the switch, then audio is converted to wav and copied. This is useful 
 % for sharing data, but takes space.
 
-% NEED to track down issues with location of local kaldi-trunk. It's not in
-% /projects.
+% The result is used with
 
 if (nargin < 1)
-    name = 'seoul_10k';
+    name = 'spanish1b';
 end
 
 datfile = 0;
@@ -64,22 +63,6 @@ switch name
      phones = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/data/lang/phones.txt';
      transcript = '/projects/speech/sys/kaldi-trunk/egs/bp_ldcWestPoint/Unigram_s5_ALLSTEPS/data/trainWORD2/text';
      datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp3';
-   case 'bp0SZ'
-     % This converts without re-writing audio.
-     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/exp/mono_ali0SZ/ali.all.gz'; 
-     wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/train0SZ/wav.scp';
-     model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/exp/mono_ali0SZ/final.mdl';
-     phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/lang/phones.txt';
-     transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/train0SZ/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp0SZ';
-   case 'bp1SZ'
-     % This converts without re-writing audio.
-     alifile = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/exp/mono_ali1SZ/ali.all.gz'; 
-     wavscp = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/train0SZ/wav.scp';
-     model = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/exp/mono_ali1SZ/final.mdl';
-     phones = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/lang/phones.txt';
-     transcript = '/projects/speech/sys/kaldi-master/egs/bp_ldcWestPoint/s5_Interspeech/data/train1SZ/text';
-     datbase = '/local/matlab/Kaldi-alignments-matlab/data/bp1SZ';
    % OK
    case 'shruti1'
      alifile = '/projects/speech/sys/kaldi-trunk/egs/shruti/s5_ini/exp/mono_ali2/ali.1.gz';
@@ -176,22 +159,6 @@ switch name
     transcript = '/projects/speech/sys/kaldi-master/egs/fisher_callhome_spanish/s5-phoneticLex/data/train/text';
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/spanish1b';
     audiodir = '/projects/speech/data/matlab-wav/spanish1b';
-   case 'seoul_10k'
-    alifile = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/ali.1.gz';
-    wavscp = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/pword-wav.scp';
-    model = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/final.mdl';
-    phones = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/lang/phones.txt';
-    transcript = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/text';
-    datbase = '/local/matlab/Kaldi-alignments-matlab/data/seoul_10k';
-    audiodir = 0;
-    case 'seoul_10k2'
-    alifile = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/ali.2.gz';
-    wavscp = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/pword-wav.scp';
-    model = '/projects/speech/sys/kaldi-master/egs/seoul/s5/exp/mono_ali_10k/final.mdl';
-    phones = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/lang/phones.txt';
-    transcript = '/projects/speech/sys/kaldi-master/egs/seoul/s5/data/train_10k/text';
-    datbase = '/local/matlab/Kaldi-alignments-matlab/data/seoul_10k2';
-    audiodir = 0;
    case 'korean1a'
     alifile = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/exp/mono_ali/ali.1.gz';
     wavscp = '/projects/speech/sys/kaldi-master/egs/korean/c1-hm375/data/train/wav-uid.scp';
@@ -214,7 +181,7 @@ switch name
     transcript = '/projects/speech/sys/kaldi-trunk/egs/etri/c1/data/train_10k/text'; 
     datbase = '/local/matlab/Kaldi-alignments-matlab/data/etri10k';
     % Rewrite audio.
-    audiodir = '/local/tmp/etri10k';
+    audiodir = '/projects/speech/data/matlab-wav/etri10k';
    case 'bp_ne_func_nplus1' % Basic disambiguation with n+1 options.
     alifile = [bpf '/Unigram_s5_NE_FUNC/exp/mono_aliWORD2/ali.all.gz']; 
     wavscp = [bpf '/Unigram_s5_NE_FUNC/data/trainWORD2/wav.scp'];

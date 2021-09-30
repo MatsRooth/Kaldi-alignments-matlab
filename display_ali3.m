@@ -19,7 +19,7 @@ load(datfile);
 Scp = dat.scp;
 P = dat.phone_indexer;
 Uid = dat.uid;
-% Wrd = dat.wrd;
+%Wrd = dat.wrd;
 Basic = dat.basic;
 Align_pdf = dat.pdf;
 Align_phone = dat.align_phone;
@@ -82,7 +82,7 @@ utterance_data(ui);
         [nsample,~] = size(w);
         [~,nframe] = size(F);
         % pitch
-        [fx,tt]=fxrapt(w,fs);
+        % [fx,tt]=fxrapt(w,fs);
     end
 
     % Range of samples being displayed, this is global.
@@ -175,15 +175,15 @@ utterance_data(ui);
 
  
         
-        skf = max(fx);
+        %skf = max(fx);
         
-        tt1 = tt(:,1);
-        tt2 = tt1 >= S1 & tt1 <= SN;
-        tt3 = tt1(tt2) / M;
-        fx3 = (2 * fx(tt2)/skf) - 1.0;
+        %tt1 = tt(:,1);
+        %tt2 = tt1 >= S1 & tt1 <= SN;
+        %tt3 = tt1(tt2) / M;
+        %fx3 = (2 * fx(tt2)/skf) - 1.0;
         
-        hold;
-        plot(tt3,fx3,'*');
+        %hold;
+        %plot(tt3,fx3,'*');
         
         %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
 
@@ -215,7 +215,7 @@ utterance_data(ui);
     end
 
     function display_centered_alignment()
-       wrdi = Wrd{ui}; 
+       wrdi = Basic{ui}; 
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
        display_alignment(lft);

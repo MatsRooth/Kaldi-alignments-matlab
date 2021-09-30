@@ -1,9 +1,7 @@
-function convert_ali(alifile,wavscp,model,phones,transcript,savefile,audiodir)
+function convert_ali2(alifile,wavscp,model,phones,transcript,savefile,audiodir,korean)
 %  Convert alignment data to a mat file.
 %  If audiodir is given, write wav files there and store the audiodir
 %  in dat.audiodir, and the wav file names in dat.wav.
-
-% THIS VERSION IS SUPERCEDED by convert_ali2.
 
 %  Conversion stores information which allows display or markup using a
 %  token index.
@@ -19,7 +17,7 @@ if nargin < 6
     alifile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/alig.all.gz';
     wavscp = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
     model = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/exp/tri3b_ali_clean_100_V/final.alimdl';
-    phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5/data/lang_nosp/phones.txt';
+    phones = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
 	transcript = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/lang_nosp/phones.txt';
     savefile = '/local/tmp/ls3x';
     audiodir = '/local/tmp/audio';
@@ -86,6 +84,27 @@ save(savefile,'dat');
             %disp(cmd);
             %disp(scp);
             %disp(wav)
+            % This somehow fixes flacLIB problem.
+            setenv('DYLD_LIBRARY_PATH','');
+            setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
+            system(cmd);
+        end
+    end
+
+    function convert_korean_audio(n)
+        for j = 1:n
+            % ko_4012_100291-100365
+            uid = Uid{j};
+            A = strsplit(uid,'_');
+            wavid = [A(1),'_',A(2)];
+            % Name of wav file to write
+            wav = [audiodir '/' uid '.wav'];
+            Wav{j} = [uid '.wav']; 
+            cmd = [Scp(wavid), ' cat > ' wav];
+            disp(j);
+            disp(cmd);
+            disp(scp);
+            disp(wav)
             % This somehow fixes flacLIB problem.
             setenv('DYLD_LIBRARY_PATH','');
             setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');

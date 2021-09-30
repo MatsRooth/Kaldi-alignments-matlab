@@ -1,9 +1,10 @@
 function Scp = load_kaldi_wavscp(scpfile)
 % Scp is a map from utterance IDs to launch pipes for sph files.
+% Test: Scp2 = load_kaldi_wavscp()
  
 % Default argument is in the train directory for rm/s5.
 if nargin < 1
-    scpfile = '/projects/speech/sys/kaldi-trunk/egs/rm/s5/data/train/wav.scp';
+    scpfile = '/projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/wav.scp';
 end
 
 % Initialize the map.

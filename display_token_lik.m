@@ -1,21 +1,43 @@
-function display_ali_with_token3(datfile,audiodir,tokenfile,framec)
-% Browse tokens in a display where the complete utterance is available.
-% This is a draft of a program that works with current data structures.
-% 
-% May need addpath('/local/matlab/voicebox')
-if nargin < 2
-    audiodir = 0;
-end
-% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/word/dormit?rios2.wrd.tok',150);
-% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/prompt/s001.tok',150);
+function display_token_lik(tokenfile,datfile,likfile,framec,audiodir)
+
+% May need addpath('/local/matlab/kaldi-to-matlab')
+
+% Default for demo.
 if nargin < 1
-    datfile = '/Volumes/Gray/matlab/matlab-mat/ls3all.mat';
-    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls3all';
-    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    tokenfile = '/local/res/phon/stress/datar/CANae1_AH0.tok';
+    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat'; %All the 100k data, or 1/8 of it for 100a.
+    audiodir = 0; % Audio will be read using Kaldi.
+    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
+    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
+    % 1836 tokens of SOME
+    % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
+    tokenfile = '/local/res/stress/data/cvc_THAT.tok'; 
+    % Should be in text format.
+    % likfile = '/local/res/stress/data/cvc_phone_THAT.lik';
+    likfile = '/local/res/stress/data/cvc_phone_THAT.feat';
     % Number of frames to display.
-    framec = 150;
+    framec = 40;
 end
+
+% PDF ids we care about. These are zero-indexed.
+PDF0 = [94:96,100:102,22:24];
+% The same 1-indexed.
+% PDF1 = PDF0 + ones(1,9);
+PDF1 = 1:13;
+
+lik = readkalditfeatures(likfile);
+
+
+% Map extended uids to matrices of likes.
+Lmap = containers.Map();
+[~,ulmax] = size(lik.utt);
+for i = 1:ulmax
+    uid_phone = cell2mat(lik.utt(i));
+    Lmap(uid_phone) = cell2mat(lik.feature(i));
+end
+
+% Lmap('103-1240-0002-24-3') gives the matrix of likes for phone 103-1240-0002-24-3,
+% with frames as the column index and pdf ids (shifted by 1) as the row index.
+% size(Lmap('103-1240-0002-24-3')) => 127 4
 
 % Load sets dat to a structure. It has to be initialized first.
 dat = 0;
@@ -57,7 +79,7 @@ end
 fclose(token_stream);
 
 % Given a token index j,
-%   Tu{j} is the uid for the token as a string. Why not an index?
+%   Tu{j} is the uid for the token as a string. 
 %   To{j} is the word offset
  
 % Index in Tu and To of token being displayed.
@@ -86,9 +108,14 @@ sR = 0; x1 = 0; xn = 0;
 positionVector1 = 0;
 positionVector2 = 0;
 
+% Variables related to the target word;
+ wrdi = 0; wrdi_fs = 0; wrdi_fe = 0;
+ Li1 = 0; Li2 = 0; Li3 = 0;
+ L1 = 0; L2 = 0; L3 = 0;
+ 
 % Pitch.
 % Return values for fxrapt.
-% fx = 0; tt = 0; 
+fx = 0; tt = 0; 
 % Version of tt with frame indexing.
 ttf = 0;
 % ttf and fx restricted to the frames being displayed.
@@ -131,7 +158,7 @@ utterance_data(ui);
         [nsample,~] = size(w);
         [~,nframe] = size(F);
         % pitch
-        % [fx,tt]=fxrapt(w,fs);
+        [fx,tt]=fxrapt(w,fs);
     end
 
     % Range of samples being displayed, this is global.
@@ -154,25 +181,31 @@ utterance_data(ui);
 
     function display_alignment(f)
         subplot('Position',positionVector1);
+        % Target word index
+        wrdi = To{ti};
+        % Frame start and end of the target word
+        wrdi_fs = Wb(1,wrdi);
+        wrdi_fe = Wb(2,wrdi);
         % f is the suggested start frame
         % Start frame
-        F1 = max([1,min([Fn - framec,f])]);
+        % F1 = max([1,min([Fn - framec,f])]);
+        F1 = wrdi_fs;
         % End frame
-        FN = min([F1 + framec, Fn]);
-        % sound(w,fs);
+        % FN = min([F1 + framec, Fn]);
+        FN = wrdi_fe;
+        % Display the frame interval to terminal.
         disp([F1,FN])
         % First and last samples to display.
-        %S1 = floor(F1  * M); 
-        %SN = floor(FN * M);
         S1 = floor((F1 - 1) * M + 1); 
         SN = floor((FN - 1) * M - 1);
         % Range of samples to display.
         SR = S1:SN;
         
+        % Vertical scale for waveform.
         sk = 1.2 * max(abs(w));
-        
+        % Plot the waveform.
         plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
-
+        % Play the sound.
         sound(w(SR),fs);
         
         ya = 1.0;
@@ -180,7 +213,6 @@ utterance_data(ui);
         axis([S1/M, SN/M, -ya, ya]);
         AX = axis();
                
-
         % Draw subphone bars.
         % SU(N) subphone that the Nth frame is in.
         % SUstart(PH(p)) start of pth phone
@@ -203,9 +235,9 @@ utterance_data(ui);
            % k is frame where phone p starts.
            k = Pb(1,p);
            pn = int2str(p);
-           ps = P.ind2shortphone(PX(k));
+           ps = P.ind2phone(PX(k));
            bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
-           text(k,ya * 0.8,ps,'FontSize',18);
+           text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
         end
         
        
@@ -221,17 +253,15 @@ utterance_data(ui);
            end
         end
 
- 
+        skf = max(fx);
         
-        %skf = max(fx);
+        tt1 = tt(:,1);
+        tt2 = tt1 >= S1 & tt1 <= SN;
+        tt3 = tt1(tt2) / M;
+        fx3 = (2 * fx(tt2)/skf) - 1.0;
         
-        %tt1 = tt(:,1);
-        %tt2 = tt1 >= S1 & tt1 <= SN;
-        %tt3 = tt1(tt2) / M;
-        %fx3 = (2 * fx(tt2)/skf) - 1.0;
-        
-        %hold;
-        %plot(tt3,fx3,'*');
+        hold;
+        plot(tt3,fx3,'*');
         
         %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
 
@@ -257,40 +287,40 @@ utterance_data(ui);
             'PickableParts','all','FaceColor','b','FaceAlpha',0.02);
         
         title([int2str(ui),' ',uid2],'FontSize',18);
-        subplot('Position',positionVector2);
-        %v = v_ppmvu(w(SR),fs,'e'); 
-        %plot(v);
-        %figure;
-        %plot(tt3,fx3,'g*');
-        % rms amplitude
-        % rms2(signal, windowlength, overlap, zeropad)
-        windowlength = 200;
-        overlap = 100;
-        d2 = windowlength - overlap;
-
-        r = rms2(w(SR),windowlength,overlap,1);
-        [~,ssr] = size(SR);
-        x1 = SR(1)/M;
-        xn = SR(ssr)/M;
-        [~,sR] = size(r);
-        XR = (((1:sR)/sR) * (xn - x1)) + (ones(1,sR) * x1);
         
-        plot(XR,r);        
-        AX2 = axis();
-        AX2(1) = AX(1);
-        AX2(2) = AX(2);
-        axis(AX2);
+        % Plot the likes
+        subplot('Position',positionVector2);
+
+        % Likes for the target word
+        Li1 = Lmap([uid,'-',int2str(wrdi),'-1']);
+        L1 = Li1(PDF1,:);
+        Li2 = Lmap([uid,'-',int2str(wrdi),'-2']);
+        L2 = Li2(PDF1,:);
+        Li3 = Lmap([uid,'-',int2str(wrdi),'-3']);
+        L3 = Li3(PDF1,:);
+        
+        % axis([F1,FN,1,15]);
+        imagesc([L1,L2,L3]);
         
         
     end
 
     function display_centered_alignment()
        wrdi = To{ti}; 
-       lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
+       lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - (framec / 2));
        disp(lft);
        display_alignment(lft);
     end
 
+
+    function p2 = trim_phone(p)
+        % Remove the part of phone symbol p after '_'.
+        p2 = p;
+        loc = strfind(p,'_');
+        if loc
+           p2 = p2(1:(loc - 1)); 
+        end 
+    end
 
     function subphoneplay(~,y)
         subphone = F(1,int16(floor(y.IntersectionPoint(1))));
@@ -313,18 +343,6 @@ utterance_data(ui);
         en = min(floor(Pb(2,phone) * M),SN);
         sound(w(st:en),fs);
     end
-
-    %function wordplay(~,y)
-    %    word = F(3,int16(floor(y.IntersectionPoint(1))));
-    %    % Value is 0 in a silence.
-    %    if word > 0
-    %        disp(sprintf('word %d, frame %d-%d\n%s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
-    %        M = fs / 100;
-    %        st = max(1,floor((Wb(1,word) - 1) * M));
-    %        en = min(floor(Wb(2,word) * M),SN);
-    %        sound(w(st:en),fs);
-    %    end
-    %end
 
     function wordplay(x,y)
         word = F(3,int16(floor(y.IntersectionPoint(1))));
@@ -350,7 +368,6 @@ utterance_data(ui);
             sound(w2(st:en),fs);
         end
     end   
-
 
     function play_current(~,~)
         % phone = PH(int16(floor(y.IntersectionPoint(1))));
@@ -415,13 +432,13 @@ utterance_data(ui);
     
     function increment_frame(~,~)
         clf;
-        display_alignment(F1 + 50); 
+        display_alignment(F1 + 20); 
         add_buttons;
     end
 
     function decrement_frame(~,~)
         clf;
-        display_alignment(F1 - 50); 
+        display_alignment(F1 - 20); 
         add_buttons;
     end
 
@@ -438,13 +455,40 @@ utterance_data(ui);
     end
 
 figure();
-positionVector1 = [0.05, 0.3, 0.9, 0.6];
+%positionVector1 = [0.05, 0.3, 0.9, 0.6];
+positionVector1 = [0.05, 0.5, 0.9, 0.3];
 subplot('Position',positionVector1)
-positionVector2 = [0.05, 0.1, 0.9, 0.15];
+% positionVector2 = [0.05, 0.1, 0.9, 0.15];
+positionVector2 = [0.05, 0.1, 0.9, 0.3];
 subplot(2,1,1);
 display_centered_alignment();
 add_buttons;      
 
+
+
+    function segment(unit,segfile)
+     % print out a segment table for the current utterance
+     % for unit=1 subphone, unit=2 phone, unit=3 ..
+       segstream = fopen(segfile,'w');
+       switch unit
+           case 1
+              [~,m] = size(Sb);
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Sb(1,i) - 1,Sb(2,i) - 1);
+              end
+           case 2 
+              [~,m] = size(Pb);
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Pb(1,i) - 1,Pb(2,i) - 1);
+              end
+           case 3
+              [~,m] = size(Wb); 
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Wb(1,i) - 1,Wb(2,i) - 1);
+              end
+       end
+       fclose(segstream);
+    end
  
 end
 

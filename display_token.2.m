@@ -1,20 +1,54 @@
-function display_ali_with_token3(datfile,audiodir,tokenfile,framec)
-% Browse tokens in a display where the complete utterance is available.
-% This is a draft of a program that works with current data structures.
-% 
+function display_token(tokenfile,datfile,framec,audiodir)
+% The .mat file datfile is created with con
 % May need addpath('/local/matlab/voicebox')
-if nargin < 2
+
+% display_token('/local/res/stress/datar/WASaa1_AH1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+% display_token('/local/res/ls3/wdata/MYay1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+% display_token('/local/res/stress/datar/CANae1_AE1.tok','/projects/speech/data/matlab-mat/ls3all.mat')
+% 3-syllable words in Librispeech monophone model:
+%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
+%    display_token('/local/matlab/Kaldi-alignments-matlab/data/syl3-010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
+
+% 4-syllable words
+% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-1020.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
+% display_token('/local/matlab/Kaldi-alignments-matlab/data/syl4-2010.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
+
+% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
+% display_token('/local/matlab/Kaldi-alignments-matlab/data-bpn/word/alguma2.wrd.tok','/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat')
+
+% Tokens of NOT.  First one is the sanity check.
+% display_token('/local/res/stress/datar/NOTaa1.tok','/local/matlab/Kaldi-alignments-matlab/data/ls3mono100a.mat')
+
+if nargin < 4
     audiodir = 0;
 end
-% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/word/dormit?rios2.wrd.tok',150);
-% display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/prompt/s001.tok',150);
+
+if nargin < 3
+    framec = 100;
+end
+
+
+% Default for demo.
 if nargin < 1
-    datfile = '/Volumes/Gray/matlab/matlab-mat/ls3all.mat';
-    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls3all';
-    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    tokenfile = '/local/res/phon/stress/datar/CANae1_AH0.tok';
+    % datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat'; %All the 100k data.
+    datfile = '/projects/speech/data/matlab-mat/bp0V.mat';
+    tokenfile = '/projects/speech/data/matlab-mat/bp0V.tok';
+    audiodir = 0; % Audio will be read using Kaldi.
+    %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100_V/text | awk -f ../token-index.awk -v WORD=WILLih1 > ls3-WILLih1a.tok
+    % tokenfile = /local/matlab/Kaldi-alignments-matlab/data/ls3-WILLih1a.tok.tok';
+    % 1836 tokens of SOME
+    % tokenfile = '/local/res/stress/datar/SOMEah1.tok'; %ok
+    % tokenfile =  '/local/res/stress/datar/CANae1_AE1.tok' 
     % Number of frames to display.
-    framec = 150;
+    framec = 160;
+end
+
+if nargin == 1
+    datfile = '/projects/speech/data/matlab-mat/ls3all.mat';
+    audiodir = 0; % Audio will be read using Kaldi.
+    tokenfile = ['/local/res/stress/datar/',tokenfile];
+    % Number of frames to display.
+    framec = 120;
 end
 
 % Load sets dat to a structure. It has to be initialized first.
@@ -34,9 +68,13 @@ Tra = dat.tra;
 
 
 % Cell array of uids for tokens.
+% Indexing and the below corresonds to line numbers in the token file.
 Tu = {};
 % Vector of word offsets for tokens.
 To = [];
+% All of the fields. The token file has a variable number of columns
+% with properties of the token.
+Pa = {};
 
 % Load the token data.
 % Running index.
@@ -50,15 +88,19 @@ while ischar(itxt)
     uid = part{1};
     offset = str2num(part{2});
     Tu{j} = uid;
-    To{j} = offset;   
+    To{j} = offset;
+    % Store all of the fields.
+    Part{j} = part;
     itxt = fgetl(token_stream);
     j = j + 1;
 end
 fclose(token_stream);
 
 % Given a token index j,
-%   Tu{j} is the uid for the token as a string. Why not an index?
+%   Tu{j} is the uid for the token as a string, e.g. 'f01br16b22k1-s001'.
 %   To{j} is the word offset
+%   Part{j} has the fields of the token file.  Part{j}{6} is the word form,
+%   e.g. 'este0V'.
  
 % Index in Tu and To of token being displayed.
 ti = 1;
@@ -88,7 +130,11 @@ positionVector2 = 0;
 
 % Pitch.
 % Return values for fxrapt.
-% fx = 0; tt = 0; 
+fx = 0; tt = 0; 
+
+% Return values for fxpfac.
+fx2 = 0; pv2 = 0;
+
 % Version of tt with frame indexing.
 ttf = 0;
 % ttf and fx restricted to the frames being displayed.
@@ -131,7 +177,20 @@ utterance_data(ui);
         [nsample,~] = size(w);
         [~,nframe] = size(F);
         % pitch
-        % [fx,tt]=fxrapt(w,fs);
+        [fx,tt]=fxrapt(w,fs);
+        
+        % pitch via fxpefax
+        tinc = 0.01;
+        [fx2a,tx2a,pv2a,fv2a] = fxpefac(w,fs,tinc);
+        % Frame version of the time vector tx2.
+        tx2b = ceil(tx2a .* (fs / M))';
+        % Frame indexed probability of voicing.
+        pv2 = ones(1,nframe) * NaN;
+        pv2(tx2b) = pv2a;
+        % Frame indexed pitch.
+        fx2 = ones(1,nframe) * NaN;
+        fx2(tx2b) = fx2a;
+        
     end
 
     % Range of samples being displayed, this is global.
@@ -159,20 +218,19 @@ utterance_data(ui);
         F1 = max([1,min([Fn - framec,f])]);
         % End frame
         FN = min([F1 + framec, Fn]);
-        % sound(w,fs);
+        % Display the frame interval to terminal.
         disp([F1,FN])
         % First and last samples to display.
-        %S1 = floor(F1  * M); 
-        %SN = floor(FN * M);
         S1 = floor((F1 - 1) * M + 1); 
         SN = floor((FN - 1) * M - 1);
         % Range of samples to display.
         SR = S1:SN;
         
+        % Vertical scale for waveform.
         sk = 1.2 * max(abs(w));
-        
+        % Plot the waveform.
         plot(SR/M,w(SR)/sk,'Color',[0.7,0.7,0.7]);
-
+        % Play the sound.
         sound(w(SR),fs);
         
         ya = 1.0;
@@ -180,7 +238,6 @@ utterance_data(ui);
         axis([S1/M, SN/M, -ya, ya]);
         AX = axis();
                
-
         % Draw subphone bars.
         % SU(N) subphone that the Nth frame is in.
         % SUstart(PH(p)) start of pth phone
@@ -203,9 +260,9 @@ utterance_data(ui);
            % k is frame where phone p starts.
            k = Pb(1,p);
            pn = int2str(p);
-           ps = P.ind2shortphone(PX(k));
+           ps = P.ind2phone(PX(k));
            bar = line([k,k],[-ya,ya] * 0.99,'LineWidth',2.0,'Color',[0.2,0.2,0.85]);
-           text(k,ya * 0.8,ps,'FontSize',18);
+           text(k,ya * 0.8,trim_phone(ps),'FontSize',18);
         end
         
        
@@ -221,23 +278,20 @@ utterance_data(ui);
            end
         end
 
- 
+        skf = max(fx);
         
-        %skf = max(fx);
+        tt1 = tt(:,1);
+        tt2 = tt1 >= S1 & tt1 <= SN;
+        tt3 = tt1(tt2) / M;
+        fx3 = (2 * fx(tt2)/skf) - 1.0;
         
-        %tt1 = tt(:,1);
-        %tt2 = tt1 >= S1 & tt1 <= SN;
-        %tt3 = tt1(tt2) / M;
-        %fx3 = (2 * fx(tt2)/skf) - 1.0;
-        
-        %hold;
-        %plot(tt3,fx3,'*');
-        
-        %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
+        hold;
+        plot(tt3,fx3,'*');
 
+        % Plot probability of voicing
+        % plot(F1:FN, pv2(F1:FN),'o','MarkerFaceColor',[0.9 0.9 0]);
+        plot(F1:FN, pv2(F1:FN),'o','color',[0.7 0.7 0]);
         
-        
-         
         pp = patch([F1,FN,FN,F1],[0,0,ya,ya],'g');
         ps = patch([F1,FN,FN,F1],[0,0,-0.7 * ya,-0.7 * ya],'r' );
         pw = patch([F1,FN,FN,F1],[-0.7 * ya,-0.7 * ya,-ya,-ya],'g' );
@@ -256,7 +310,8 @@ utterance_data(ui);
         set(pw,'ButtonDownFcn',hwp,... 
             'PickableParts','all','FaceColor','b','FaceAlpha',0.02);
         
-        title([int2str(ui),' ',uid2],'FontSize',18);
+        %title([int2str(ui),' ', uid2, ' ', Part{To{ti}}{6}],'FontSize',18);
+        title([int2str(ui),' ', uid2, ' ', tra{To{ti}}],'FontSize',18);
         subplot('Position',positionVector2);
         %v = v_ppmvu(w(SR),fs,'e'); 
         %plot(v);
@@ -264,8 +319,9 @@ utterance_data(ui);
         %plot(tt3,fx3,'g*');
         % rms amplitude
         % rms2(signal, windowlength, overlap, zeropad)
-        windowlength = 200;
-        overlap = 100;
+        % These values give smooth plot. Used to be 200 100.
+        windowlength = 400;
+        overlap = 200;
         d2 = windowlength - overlap;
 
         r = rms2(w(SR),windowlength,overlap,1);
@@ -288,9 +344,20 @@ utterance_data(ui);
        wrdi = To{ti}; 
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
+       % Display the fields from the token file to the command window.
+       %disp(Pa{ti});
        display_alignment(lft);
     end
 
+
+    function p2 = trim_phone(p)
+        % Remove the part of phone symbol p after '_'.
+        p2 = p;
+        loc = strfind(p,'_');
+        if loc
+           p2 = p2(1:(loc - 1)); 
+        end 
+    end
 
     function subphoneplay(~,y)
         subphone = F(1,int16(floor(y.IntersectionPoint(1))));
@@ -314,18 +381,6 @@ utterance_data(ui);
         sound(w(st:en),fs);
     end
 
-    %function wordplay(~,y)
-    %    word = F(3,int16(floor(y.IntersectionPoint(1))));
-    %    % Value is 0 in a silence.
-    %    if word > 0
-    %        disp(sprintf('word %d, frame %d-%d\n%s %s',word,Wb(1,word),Wb(2,word),uid,tra{word}));
-    %        M = fs / 100;
-    %        st = max(1,floor((Wb(1,word) - 1) * M));
-    %        en = min(floor(Wb(2,word) * M),SN);
-    %        sound(w(st:en),fs);
-    %    end
-    %end
-
     function wordplay(x,y)
         word = F(3,int16(floor(y.IntersectionPoint(1))));
         btn = y.Button;
@@ -340,9 +395,9 @@ utterance_data(ui);
             M = fs / 100;
             st = max(1,floor((Wb(1,word) - 1) * M));
             if (btn==3)
-                % Three words, two-finger tap as my mac is configures.
+                % Two words, two-finger tap as my mac is configures.
                 % Need to fix this to take into account the right edge.
-                en = min(floor(Wb(2,word + 2) * M),SN);
+                en = min(floor(Wb(2,word + 1) * M),SN);
             else
                 % One word 
                 en = min(floor(Wb(2,word) * M),SN);
@@ -350,7 +405,6 @@ utterance_data(ui);
             sound(w2(st:en),fs);
         end
     end   
-
 
     function play_current(~,~)
         % phone = PH(int16(floor(y.IntersectionPoint(1))));
@@ -415,13 +469,13 @@ utterance_data(ui);
     
     function increment_frame(~,~)
         clf;
-        display_alignment(F1 + 50); 
+        display_alignment(F1 + 20); 
         add_buttons;
     end
 
     function decrement_frame(~,~)
         clf;
-        display_alignment(F1 - 50); 
+        display_alignment(F1 - 20); 
         add_buttons;
     end
 
@@ -445,6 +499,31 @@ subplot(2,1,1);
 display_centered_alignment();
 add_buttons;      
 
+
+
+    function segment(unit,segfile)
+     % print out a segment table for the current utterance
+     % for unit=1 subphone, unit=2 phone, unit=3 ..
+       segstream = fopen(segfile,'w');
+       switch unit
+           case 1
+              [~,m] = size(Sb);
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Sb(1,i) - 1,Sb(2,i) - 1);
+              end
+           case 2 
+              [~,m] = size(Pb);
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Pb(1,i) - 1,Pb(2,i) - 1);
+              end
+           case 3
+              [~,m] = size(Wb); 
+              for i = 1:m
+                fprintf(segstream,'%s-%d\t%s\t%d\t%d\n',uid,i,uid,Wb(1,i) - 1,Wb(2,i) - 1);
+              end
+       end
+       fclose(segstream);
+    end
  
 end
 
