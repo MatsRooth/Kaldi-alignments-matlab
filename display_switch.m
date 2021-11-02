@@ -2,15 +2,15 @@ function display_switch(name)
 % May need addpath('/local/matlab/voicebox')
 
 if (nargin < 1)
-    name = 'ls3a';
+    name = 'librispeech100_v2';
 end
     
 datfile = 0;
 audiodir = 0;
-audiobase = '/local/matlab-wav';
+audiobase = '/projects/speech/data/matlab-wav';
 %datbase =  '/projects/speech/data/matlab-mat';
 %audiobase = 'matlab-wav';
-datbase =  '/local/matlab-mat';
+datbase =  '/projects/speech/data/matlab-mat';
 
 framec = 150;
      
@@ -89,6 +89,11 @@ switch name
      datfile = [datbase '/' name '.mat'];
      audiodir = 0;
      framec = 100; 
+     librispeech100_v2
+   case 'librispeech100_v2' % ok
+     datfile = [datbase '/' name '.mat'];
+     audiodir = [audiobase '/' name];
+     framec = 100;      
    case 'vm1a' % ok. This uses kaldi to get audio.
      datfile = [datbase '/' name '.mat'];
      audiodir = 0;
@@ -151,5 +156,14 @@ end
  
 end
 
+% Dependencies
+% [fList,pList] = matlab.codetools.requiredFilesAndProducts('display_switch.m');
+% disp(fList)
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/display_ali3.m'         }
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/display_switch.m'       }
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/load_ali.m'             }
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/load_kaldi_transcript.m'}
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/parse_ali.m'            }
+%    {'/System/Volumes/Data/local/matlab/Kaldi-alignments-matlab/phone_indexer.m'        }
 
 
