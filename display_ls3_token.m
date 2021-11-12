@@ -11,35 +11,18 @@ function display_ls3_token(tokenfile,matfile,audiodir,framec)
 % matfile mat file encoding data structures
 % tokenfile tokens to display
 
-% Default arguments.
+% CAN data
+% display_ls3_token('/local/res/phon/stress/datar/CAN-AE1.tok','/Volumes/gray/matlab/matlab-mat/lsCAN.mat','/Volumes/gray/matlab/matlab-wav/lsCAN',100)
 
-if nargin < 4
-    framec = 150;
-end
+audiodir = '/Volumes/gray/matlab/matlab-wav/lsCAN';
 
-% These default files are on MR's external disk Gray.
+% This version was converted using convert_ali3 and prepare-ali.sh.
+matfile = '/Volumes/gray/matlab/matlab-mat/lsCAN2.mat';
 
-if nargin < 3
-    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls3all';
-end
+tokenfile = '/local/res/phon/stress/datar/CAN-AE1.tok';
 
-if nargin < 2
-    matfile = '/Volumes/Gray/matlab/matlab-mat/ls3all.mat';
-end
-% CANae1_AE1.tok	CANae1_AH0.tok
+framec = 100;
 
-if nargin < 1
-    tokenfile = '/local/res/phon/stress/datar/CANae1_AH0.tok';
-end
-
-% Other realization
-% display_ls3_token('/local/res/phon/stress/datar/CANae1_AE1.tok')
-
-% Procedure for creating token file using token-index.awk.
-
-%cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    
- 
 display_ali_with_token3(matfile,audiodir,tokenfile,framec)
 
 end
