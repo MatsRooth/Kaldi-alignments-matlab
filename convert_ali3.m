@@ -72,7 +72,7 @@ end
 
 disp(savefile);
 
-save(savefile,'dat');
+save(savefile, 'dat', '-v7.3');
 
     function convert_audio(n)
         for j = 1:n
