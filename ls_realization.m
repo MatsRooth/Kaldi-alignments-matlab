@@ -22,11 +22,10 @@ if nargin < 3
     framec = 100;
 end
 
-% Default for demo, yielding 38849 tokens.
+% New version of ls3. It yields 990101 tokens Nov 2 2021.
 if nargin < 1
-    % This is actually librispeech, not librispeech3.
-    datfile = '/local/matlab/Kaldi-alignments-matlab/data/ls3mono100.mat';
-    outfile = '/local/matlab/Kaldi-alignments-matlab/data/ls_mono_realization.tok';
+    datfile = '/Volumes/gray/matlab/matlab-mat/ls3all.mat';
+    outfile = '/Volumes/gray/matlab/matlab-mat/ls3all_realization.tok';
 end
 
 % Run it on whole train100, yielding 409303 tokens.
@@ -65,7 +64,10 @@ Fn = 0; PDF = 0;
 wdl = 0;
 wd = 0;
 wdr = 0;
- 
+
+% Initialize because it is set in a function.
+BASIC = 0;
+
 % Set data for utterance with uid index k.
     function utterance_data(k)
         uid = cell2mat(Uid(k));
