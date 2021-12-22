@@ -9,10 +9,15 @@ end
 % display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/word/dormit?rios2.wrd.tok',150);
 % display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/prompt/s001.tok',150);
 if nargin < 1
-    datfile = '/Volumes/Gray/matlab/matlab-mat/ls3all.mat';
-    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls3all';
+    %datfile = '/Volumes/Gray/matlab/matlab-mat/can100nosp.mat';
+    datfile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/SOME360.mat';
+    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls360';
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
-    tokenfile = '/local/res/phon/stress/datar/CANae1_AH0.tok';
+    %tokenfile='/local/res/phon/stress/datar/prp-can-vb-AE1.tok';
+    %tokenfile='/local/res/phon/parse/conllu-can.tok';
+    tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/some_cases_360.tok';
+    %tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/some_kind_360.tok';
+    %prp-can-vb.tok
     % Number of frames to display.
     framec = 150;
 end
@@ -38,13 +43,17 @@ Tu = {};
 % Vector of word offsets for tokens.
 To = [];
 
+
 % Load the token data.
 % Running index.
 j = 1;
 token_stream = fopen(tokenfile);
 
+
+
 itxt = fgetl(token_stream);
 while ischar(itxt)
+    disp(itxt);
     itxt = strtrim(itxt);
     part = strsplit(itxt);
     uid = part{1};
@@ -88,7 +97,7 @@ positionVector2 = 0;
 
 % Pitch.
 % Return values for fxrapt.
-% fx = 0; tt = 0; 
+fx = 0; tt = 0; 
 % Version of tt with frame indexing.
 ttf = 0;
 % ttf and fx restricted to the frames being displayed.
@@ -131,7 +140,7 @@ utterance_data(ui);
         [nsample,~] = size(w);
         [~,nframe] = size(F);
         % pitch
-        % [fx,tt]=fxrapt(w,fs);
+        [fx,tt]=v_fxrapt(w,fs);
     end
 
     % Range of samples being displayed, this is global.
@@ -221,17 +230,17 @@ utterance_data(ui);
            end
         end
 
- 
+        % Pitch
         
-        %skf = max(fx);
+        skf = max(fx);
         
-        %tt1 = tt(:,1);
-        %tt2 = tt1 >= S1 & tt1 <= SN;
-        %tt3 = tt1(tt2) / M;
-        %fx3 = (2 * fx(tt2)/skf) - 1.0;
+        tt1 = tt(:,1);
+        tt2 = tt1 >= S1 & tt1 <= SN;
+        tt3 = tt1(tt2) / M;
+        fx3 = (2 * fx(tt2)/skf) - 1.0;
         
-        %hold;
-        %plot(tt3,fx3,'*');
+        hold;
+        plot(tt3,fx3,'*');
         
         %fx - mean(fx(tt(:,3) == 1)) * ones(size(fx))) / mean(fx(tt(:,3) == 1))
 
@@ -256,7 +265,7 @@ utterance_data(ui);
         set(pw,'ButtonDownFcn',hwp,... 
             'PickableParts','all','FaceColor','b','FaceAlpha',0.02);
         
-        title([int2str(ui),' ',uid2],'FontSize',18);
+        title([int2str(ti),' ',int2str(ui),' ',uid2],'FontSize',18);
         subplot('Position',positionVector2);
         %v = v_ppmvu(w(SR),fs,'e'); 
         %plot(v);
@@ -366,7 +375,7 @@ utterance_data(ui);
     end
 
     function next_utterance(~,~)
-        ti = ti + 1;
+        ti = min(ti + 1,T);
         ui = dat.um(Tu{ti});
         %wi = 1;
         utterance_data(ui);
@@ -376,10 +385,11 @@ utterance_data(ui);
     end
 
     function previous_utterance(~,~)
-        ui = max(1,ui - 1);
+        ti = max(ti - 1,1);
+        ui = dat.um(Tu{ti});
         utterance_data(ui);
         clf;
-        display_alignment(1); 
+        display_centered_alignment(); 
         add_buttons;
     end
 
@@ -441,10 +451,9 @@ figure();
 positionVector1 = [0.05, 0.3, 0.9, 0.6];
 subplot('Position',positionVector1)
 positionVector2 = [0.05, 0.1, 0.9, 0.15];
+      
 subplot(2,1,1);
 display_centered_alignment();
-add_buttons;      
-
- 
+add_buttons; 
 end
 
