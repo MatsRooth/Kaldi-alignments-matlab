@@ -9,13 +9,16 @@ end
 % display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/word/dormit?rios2.wrd.tok',150);
 % display_ali_with_token3('/local/matlab/Kaldi-alignments-matlab/data-bpn/bpn.mat',0,'/local/res/bp/prompt/s001.tok',150);
 if nargin < 1
-    %datfile = '/Volumes/Gray/matlab/matlab-mat/can100nosp.mat';
-    datfile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/SOME360.mat';
-    audiodir = '/Volumes/Gray/matlab/matlab-wav/ls360';
+    datfile = '/Volumes/Gray/matlab/matlab-mat/can100nosp.mat';
+    %datfile = '/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/SOME360.mat';
+    audiodir = '/Volumes/Gray/matlab/matlab-wav/lsCAN';
     %cat /projects/speech/sys/kaldi-trunk/egs/librispeech3/s5/data/train_clean_100/text | egrep 'THAN I ' | awk -f ../../token-index.awk -v WORD=I > i.tok
     %tokenfile='/local/res/phon/stress/datar/prp-can-vb-AE1.tok';
     %tokenfile='/local/res/phon/parse/conllu-can.tok';
-    tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/some_cases_360.tok';
+    %tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/some_cases_360.tok';
+    %tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/SOMEfocus.tok';
+    % tokenfile='/local/res/some/parse/for-some-time.tok';
+    tokenfile='/local/res/some/parse/pps.tok';
     %tokenfile='/projects/speech/sys/kaldi-trunk/egs/librispeech/s5_sc2359/matlab/some_kind_360.tok';
     %prp-can-vb.tok
     % Number of frames to display.
@@ -94,6 +97,7 @@ Fn = 0; PDF = 0; lft = 0;
 sR = 0; x1 = 0; xn = 0;
 positionVector1 = 0;
 positionVector2 = 0;
+wmax = 0; wrdi = 0;
 
 % Pitch.
 % Return values for fxrapt.
@@ -295,6 +299,8 @@ utterance_data(ui);
 
     function display_centered_alignment()
        wrdi = To{ti}; 
+       [~,wmax] = size(Wb);
+       wrdi = min(wrdi,wmax);
        lft = floor((Wb(1,wrdi) + Wb(2,wrdi))/2 - 50);
        disp(lft);
        display_alignment(lft);
@@ -374,10 +380,12 @@ utterance_data(ui);
         sound(w,fs);
     end
 
+
     function next_utterance(~,~)
+        % Keep ti from exceeding the maximum token index.
         ti = min(ti + 1,T);
+        % Look up the utterance index.
         ui = dat.um(Tu{ti});
-        %wi = 1;
         utterance_data(ui);
         clf;
         display_centered_alignment();
