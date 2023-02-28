@@ -1,0 +1,5220 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>cut_prosody_snippet</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-02-28"><meta name="DC.source" content="cut_prosody_snippet.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> cut_prosody_snippet(target,part,longtarget,omit,limit1,limit2)
+
+<span class="keyword">if</span> nargin &lt; 1
+  target = <span class="string">'in+my'</span>;
+  longtarget = <span class="string">'in+my+experience'</span>;
+  part = <span class="string">'2000'</span>;
+  omit = 0;
+  limit1 = 1.5;
+  limit2 = 3.0;
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> (part ~= 0)
+    base = [longtarget <span class="string">'_'</span> part];
+<span class="keyword">else</span>
+    base = longtarget;
+<span class="keyword">end</span>
+
+fiyou = <span class="string">'/local/res/fiyou'</span>;
+datfile = [fiyou <span class="string">'/matlab/'</span> base <span class="string">'.mat'</span>];
+audiodir = [fiyou <span class="string">'/data/'</span> longtarget <span class="string">'/audio_'</span> part];
+outdir = [fiyou <span class="string">'/data/'</span> longtarget <span class="string">'/snippet_'</span> part];
+
+<span class="comment">% Make the out directory</span>
+system([<span class="string">'test -d '</span> outdir <span class="string">'|| mkdir '</span> outdir]);
+
+targetwds = upper(strsplit(target,<span class="string">'+'</span>));
+<span class="comment">%disp(targetwds);</span>
+
+longtargetwds = upper(strsplit(longtarget,<span class="string">'+'</span>));
+<span class="comment">%disp(longtargetwds);</span>
+
+targetwd1  = targetwds{1};
+targetwd2  = targetwds{2};
+
+<span class="comment">%Load sets dat to a structure.</span>
+load(datfile,<span class="string">'dat'</span>);
+
+Scp = dat.scp;
+P = dat.phone_indexer;
+Uid = dat.uid;
+<span class="comment">%Wrd = dat.wrd;</span>
+Basic = dat.basic;
+Align_pdf = dat.pdf;
+Align_phone = dat.align_phone;
+Align_phone_len = dat.phone_seq;
+Tra = dat.tra;
+
+<span class="comment">% Index in Uid and Align of the utterance being displayed.</span>
+ui = 1;
+
+<span class="comment">% Maximum value for ui.</span>
+[~,U] = size(Uid);
+
+<span class="comment">% Initialize some variables that are set in nested functions.</span>
+uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; w2 = 0; fs = 0;
+
+M = 0; S1 = 0; SN = 0; N = 100;
+F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; nword = 0;
+PX = 0; ya = 0; tra = 0; wi = 1;
+Fn = 0; PDF = 0; spect = 0;
+
+<span class="comment">% Pitch.</span>
+<span class="comment">% Return values for fxrapt.</span>
+fx = 0; tt = 0;
+<span class="comment">% Version of tt with frame indexing.</span>
+ttf = 0;
+<span class="comment">% ttf and fx restricted to the frames being displayed.</span>
+fx3 =0; tt3=0;
+AX = 0;
+
+utterance_data(ui);
+
+<span class="comment">%disp(tra);</span>
+
+<span class="comment">% Set phone and audio data for k'th utterance.</span>
+    <span class="keyword">function</span> utterance_data(k)
+        uid = cell2mat(Uid(k));
+        [F,Sb,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
+        <span class="comment">% Escape underline for display.</span>
+        uid2 = strrep(uid, <span class="string">'_'</span>, <span class="string">'\_'</span>);
+        PX = Align_phone{k};
+        PDF = Align_pdf{k};
+        <span class="comment">% Maximum frame index</span>
+        [~,Fn] = size(F);
+        <span class="comment">% Load audio. Cat the pipe Scp(uid) into a temporary file.</span>
+        <span class="comment">% cmd = [Scp(uid), ' cat &gt; /tmp/display_ali_tmp.wav'];</span>
+        <span class="comment">% This helps flac work.</span>
+        <span class="comment">% setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');</span>
+        <span class="comment">% system(cmd);</span>
+        <span class="comment">% wav = '/tmp/display_ali_tmp.wav';</span>
+        <span class="comment">% Read the temporary wav file.</span>
+        <span class="comment">% [w,fs] = audioread(wav);</span>
+        <span class="comment">% Number of audio samples in a centisecond frame.</span>
+        wav = find_audio(uid);
+
+        [w,fs] = audioread(wav);
+        w2 = w;
+        [~,ch] = size(w);
+        <span class="keyword">if</span> (ch == 2)
+            w = w(:,2);
+        <span class="keyword">end</span>
+        M = fs / 100;
+        [nsample,~] = size(w);
+        [~,nframe] = size(F);
+        [~,nword] = size(Wb);
+        <span class="comment">% pitch</span>
+        <span class="comment">% [fx,tt]=fxrapt(w,fs);</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">function</span> snippet(k)
+        utterance_data(k);
+        long_offset = find_target(longtargetwds);
+        <span class="comment">% If the long target is not found.  It happens for 26.9 in</span>
+        <span class="comment">% I+have+one+now.</span>
+        <span class="keyword">if</span> (long_offset &lt; 1)
+           <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+        offset = find_target(targetwds,long_offset);
+        <span class="comment">%disp(offset)</span>
+        <span class="keyword">if</span> (offset &gt; 0)
+            st = max(1,floor((Wb(1,offset) - 1) * M));
+            mid = max(1,floor((Wb(2,offset) - 1) * M));
+            en = max(1,floor((Wb(2,offset + 1) - 1) * M));
+
+            st2 = max(1,floor((Wb(1,max(offset - 1,0)) - 1) * M));
+            en2 = max(1,floor((Wb(2,min(offset + 2,nword)) - 1) * M));
+
+            snippet_wav = w(st:en);
+            snippet_wav2 = w(st2:en2);
+
+            swav1 = w(st:mid);
+            swav2 = w(mid:en);
+
+            <span class="comment">% soundsc(snippet_wav,fs);</span>
+
+            outfile = [outdir,<span class="string">'/'</span>,Uid{k},<span class="string">'.wav'</span>];
+            outfile2 = [outdir,<span class="string">'/'</span>,Uid{k},<span class="string">'.long.wav'</span>];
+
+            disp(outfile);
+            disp(offset);
+            len1 = length(snippet_wav) / fs;
+            len2 = length(snippet_wav2) / fs;
+            disp(len1);
+            disp(len2);
+            <span class="comment">%pad1 = randn(fs - length(swav1),1) * 0.005;</span>
+            pad1 = zeros(fs - length(swav1),1);
+            pad2 = zeros(fs - length(swav2),1);
+
+
+            snippet_wav = [pad1;swav1;swav2;pad2];
+            soundsc(snippet_wav,fs);
+
+
+
+            <span class="comment">% spect = v_spgrambw(snippet_wav,fs,'pJcw');</span>
+
+            disp(length(snippet_wav) / fs );
+
+            <span class="keyword">if</span> (len1 &lt; limit1)
+                audiowrite(outfile,snippet_wav,fs);
+                audiowrite(outfile2,snippet_wav2,fs);
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% Range of samples being displayed, this is global.</span>
+    SR = [];
+
+    <span class="keyword">function</span> wav = find_audio(uid)
+        <span class="comment">% Load the audio, either by using Kaldi to generate a tmp wav file,</span>
+        <span class="comment">% or by reading from audiodir</span>
+        <span class="keyword">if</span> (audiodir ~= 0)
+            wav = [audiodir <span class="string">'/'</span> uid <span class="string">'.wav'</span>];
+        <span class="keyword">else</span>
+            <span class="comment">% Cat the pipe Scp(uid) into a temporary file.</span>
+            cmd = [Scp(uid), <span class="string">' cat &gt; /tmp/display_ali_tmp.wav'</span>];
+            <span class="comment">% This helps flac work.</span>
+            setenv(<span class="string">'PATH'</span>, <span class="string">'/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin'</span>);
+            system(cmd);
+            wav = <span class="string">'/tmp/display_ali_tmp.wav'</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+<span class="comment">% The below gave an error for the item with tra</span>
+<span class="comment">% {'IN'}    {'MY'}    {'EXPERIENCE'}    {'ALL'}    {'THE'}    {'OTHER'}    {'OPTIONS'}    {'HAVE'}    {'SOLID'}</span>
+<span class="comment">%    {'SUPPORT'}    {'BUT'}    {'DO'}    {'HAVE'}    {'ROOM'}    {'TO'}    {'IMPROVE'}    {'IN'}    {'MY'}    {'EXPERIENCE'}</span>
+<span class="comment">% apparently because longtarget is found twice. Try to fix this by setting</span>
+<span class="comment">% the default k to 2 rather than 1.</span>
+
+    <span class="keyword">function</span> res = find_target(tw,k)
+        <span class="keyword">if</span> nargin &lt; 2
+            <span class="comment">% k = 1;</span>
+            k = 2;
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> nargin &lt; 1
+            tw = targetwds;
+        <span class="keyword">end</span>
+        res = 0;
+        tlen = length(tw);
+        <span class="comment">%for i = 1:(length(tra) - tlen)</span>
+        <span class="keyword">for</span> i = k:(length(tra) - tlen + 1)
+            <span class="keyword">if</span> all(strcmp(tw, tra(i:(i + tlen - 1))))
+                <span class="comment">%disp(strcmp(tw, tra(i:(i + tlen - 1))))</span>
+                res = i;
+                <span class="keyword">break</span>;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+
+
+<span class="keyword">for</span> k = 1:U
+<span class="comment">%for k = 1:8</span>
+    snippet(k);
+    pause(0.5);
+<span class="keyword">end</span>
+
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">/local/res/fiyou/data/in+my+experience/snippet_2000/1.1.wav
+    16
+
+    0.2801
+
+    1.8001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.10.wav
+    12
+
+    0.3901
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.11.wav
+    21
+
+    0.2301
+
+    0.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.12.wav
+    11
+
+    0.3801
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.13.wav
+    19
+
+    0.2901
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.14.wav
+    22
+
+    0.4701
+
+    1.5701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.15.wav
+    21
+
+    0.2801
+
+    1.6001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.16.wav
+    29
+
+    0.3601
+
+    2.1301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.17.wav
+    21
+
+    0.5301
+
+    1.8401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.18.wav
+    18
+
+    0.3301
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.19.wav
+    12
+
+    0.3201
+
+    1.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.2.wav
+    17
+
+    0.3101
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.20.wav
+    13
+
+    0.2001
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.3.wav
+    17
+
+    0.3601
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.4.wav
+    21
+
+    0.1901
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.5.wav
+    18
+
+    0.3801
+
+    2.1901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.6.wav
+    20
+
+    0.3701
+
+    1.7901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.7.wav
+    20
+
+    0.2001
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.8.wav
+    18
+
+    0.2401
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/1.9.wav
+     5
+
+    0.2901
+
+    5.5301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.1.wav
+    13
+
+    0.2401
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.15.wav
+    16
+
+    0.4401
+
+    1.6801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.16.wav
+    21
+
+    0.3001
+
+    2.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.17.wav
+    19
+
+    0.2401
+
+    1.6101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.18.wav
+    16
+
+    0.2601
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.19.wav
+    25
+
+    0.3001
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.2.wav
+    17
+
+    0.2701
+
+    1.7301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.3.wav
+    11
+
+    0.3801
+
+    2.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.4.wav
+    23
+
+    0.2201
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/10.5.wav
+    11
+
+    0.2801
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.1.wav
+    17
+
+    0.3701
+
+    1.6601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.16.wav
+    20
+
+    0.3301
+
+    3.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.17.wav
+    21
+
+    0.4401
+
+    1.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.18.wav
+    15
+
+    0.3801
+
+    1.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.19.wav
+    18
+
+    0.4501
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.20.wav
+    20
+
+    0.1701
+
+    0.7801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.3.wav
+    25
+
+    0.6001
+
+    2.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.4.wav
+    22
+
+    0.2601
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/11.5.wav
+    18
+
+    0.4101
+
+    2.9301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.1.wav
+    14
+
+    0.2101
+
+    1.1601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.15.wav
+    20
+
+    0.3801
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.16.wav
+    18
+
+    0.2001
+
+    0.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.17.wav
+    11
+
+    0.6701
+
+    3.9201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.18.wav
+    20
+
+    0.3101
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.19.wav
+    18
+
+    0.2601
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.2.wav
+    13
+
+    0.3901
+
+    1.5101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.20.wav
+    22
+
+    0.4101
+
+    1.8401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.3.wav
+    18
+
+    0.3001
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.4.wav
+    16
+
+    0.4001
+
+    1.9701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/12.5.wav
+    20
+
+    0.2301
+
+    1.0201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.1.wav
+    21
+
+    0.5301
+
+    1.5501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.14.wav
+    15
+
+    0.2701
+
+    1.0101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.15.wav
+    24
+
+    0.3501
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.16.wav
+    15
+
+    0.4101
+
+    1.4901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.17.wav
+    20
+
+    0.2501
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.18.wav
+    19
+
+    0.2801
+
+    1.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.19.wav
+    17
+
+    0.2101
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.2.wav
+    16
+
+    0.3401
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.20.wav
+    19
+
+    0.2701
+
+    1.1201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.3.wav
+    19
+
+    0.2601
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/13.4.wav
+    24
+
+    0.2501
+
+    1.0801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.1.wav
+    24
+
+    0.2001
+
+    1.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.13.wav
+    16
+
+    0.3201
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.14.wav
+    20
+
+    0.3701
+
+    2.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.15.wav
+    24
+
+    0.2801
+
+    0.9301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.16.wav
+    20
+
+    0.3401
+
+    1.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.17.wav
+    16
+
+    0.4401
+
+    1.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.18.wav
+    14
+
+    0.1801
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.19.wav
+    18
+
+    1.2601
+
+    2.1701
+
+    2.2101
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.2.wav
+    17
+
+    0.1801
+
+    1.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.20.wav
+    19
+
+    0.2401
+
+    0.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/14.3.wav
+    18
+
+    0.3301
+
+    1.3301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.1.wav
+    19
+
+    0.2801
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.11.wav
+    18
+
+    0.4801
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.12.wav
+    18
+
+    0.4801
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.13.wav
+    17
+
+    0.4401
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.14.wav
+    19
+
+    0.2701
+
+    1.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.16.wav
+    24
+
+    0.2601
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.17.wav
+    21
+
+    0.2001
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.18.wav
+    17
+
+    0.2301
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.19.wav
+    21
+
+    0.3801
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/15.20.wav
+    15
+
+    0.3701
+
+    2.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.10.wav
+    19
+
+    0.3601
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.11.wav
+    13
+
+    0.4801
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.12.wav
+    13
+
+    0.4801
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.14.wav
+    19
+
+    0.3201
+
+    1.6101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.15.wav
+    13
+
+    0.2701
+
+    1.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.16.wav
+    20
+
+    0.2601
+
+    1.3301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.17.wav
+    18
+
+    0.3701
+
+    1.3901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.18.wav
+    16
+
+    0.3901
+
+    1.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/16.19.wav
+    16
+
+    0.5201
+
+    2.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.10.wav
+    22
+
+    0.3001
+
+    1.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.11.wav
+    25
+
+    0.1801
+
+    0.7201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.12.wav
+    25
+
+    0.1801
+
+    0.7201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.13.wav
+    17
+
+    0.2201
+
+    1.9001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.14.wav
+    19
+
+    0.1901
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.15.wav
+    20
+
+    0.1401
+
+    0.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/17.9.wav
+    13
+
+    0.2501
+
+    1.5601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.10.wav
+    15
+
+    1.6401
+
+    3.0101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.11.wav
+    21
+
+    0.2501
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.12.wav
+    21
+
+    0.2601
+
+    1.4701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.13.wav
+    16
+
+    0.4001
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.14.wav
+    18
+
+    0.2501
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.15.wav
+    21
+
+    0.3901
+
+    1.1901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.16.wav
+    12
+
+    0.5301
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.17.wav
+    21
+
+    0.2501
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.18.wav
+    23
+
+    0.2801
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.19.wav
+    16
+
+    0.3901
+
+    1.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.20.wav
+    22
+
+    0.3001
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.5.wav
+    19
+
+    0.4001
+
+    1.5501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.6.wav
+    17
+
+    0.3101
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.7.wav
+    19
+
+    0.3301
+
+    1.6501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.8.wav
+    10
+
+    0.3201
+
+    1.5701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/18.9.wav
+    19
+
+    0.1801
+
+    2.2101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.10.wav
+    21
+
+    0.5001
+
+    2.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.13.wav
+    19
+
+    0.3501
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.14.wav
+    14
+
+    0.2901
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.15.wav
+    19
+
+    0.3301
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.16.wav
+    23
+
+    0.2501
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.17.wav
+    21
+
+    0.1401
+
+    0.6801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.18.wav
+    20
+
+    0.2801
+
+    1.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/19.19.wav
+    20
+
+    0.2001
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.1.wav
+     5
+
+    0.2801
+
+    5.5301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.10.wav
+    20
+
+    0.2001
+
+    0.9701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.11.wav
+    17
+
+    0.4801
+
+    1.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.12.wav
+    15
+
+    0.1901
+
+    1.4101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.2.wav
+    15
+
+    0.3301
+
+    1.1601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.3.wav
+    18
+
+    0.3601
+
+    2.1501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.4.wav
+    18
+
+    0.2101
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.5.wav
+    17
+
+    0.1901
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.6.wav
+    16
+
+    0.3101
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.7.wav
+    23
+
+    0.4201
+
+    1.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.8.wav
+    14
+
+    0.3601
+
+    2.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/2.9.wav
+    22
+
+    0.3601
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.10.wav
+    22
+
+    0.2101
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.11.wav
+    21
+
+    0.3101
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.12.wav
+    21
+
+    0.3101
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.13.wav
+    19
+
+    0.4401
+
+    2.4001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.14.wav
+    22
+
+    0.2901
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.15.wav
+    21
+
+    1.1801
+
+    3.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.16.wav
+    21
+
+    0.3401
+
+    2.1201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/20.9.wav
+    17
+
+    0.4701
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.11.wav
+    20
+
+    0.3601
+
+    1.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.12.wav
+    20
+
+    0.3601
+
+    1.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.13.wav
+    20
+
+    0.3301
+
+    1.4901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.14.wav
+    10
+
+    0.3301
+
+    3.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.6.wav
+    17
+
+    0.1901
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.7.wav
+    21
+
+    0.2401
+
+    1.0801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/21.8.wav
+    18
+
+    0.3001
+
+    1.0201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.10.wav
+    17
+
+    0.4601
+
+    1.6901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.11.wav
+    11
+
+    0.4601
+
+    1.6701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.12.wav
+    11
+
+    0.4601
+
+    1.6701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.13.wav
+    19
+
+    0.2501
+
+    0.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.14.wav
+    17
+
+    0.1301
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.15.wav
+    13
+
+    0.1301
+
+    1.0601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.16.wav
+    18
+
+    0.1301
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.17.wav
+    22
+
+    0.2801
+
+    0.8201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.5.wav
+     9
+
+    0.3401
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.6.wav
+    22
+
+    0.4401
+
+    1.6301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.7.wav
+    15
+
+    0.4801
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.8.wav
+    19
+
+    0.2801
+
+    1.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/22.9.wav
+    19
+
+    0.2401
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.10.wav
+    21
+
+    0.2901
+
+    1.6701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.11.wav
+    10
+
+    0.2601
+
+    1.2801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.12.wav
+    10
+
+    0.2601
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.13.wav
+    12
+
+    0.3001
+
+    1.1301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.14.wav
+    16
+
+    0.3001
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.15.wav
+    19
+
+    0.2501
+
+    1.6101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.16.wav
+    21
+
+    0.3801
+
+    1.6201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.17.wav
+    17
+
+    0.2101
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.18.wav
+    20
+
+    0.3601
+
+    1.7701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.7.wav
+    19
+
+    0.2801
+
+    1.5701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.8.wav
+    20
+
+    0.2001
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/23.9.wav
+    21
+
+    0.2001
+
+    1.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.10.wav
+    23
+
+    0.3701
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.11.wav
+    13
+
+    0.2901
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.12.wav
+    13
+
+    0.2901
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.14.wav
+    12
+
+    0.3901
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.15.wav
+    20
+
+    0.2201
+
+    1.1901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.16.wav
+    17
+
+    0.2901
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.17.wav
+    17
+
+    0.2101
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.18.wav
+    23
+
+    0.3501
+
+    1.4901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.8.wav
+    23
+
+    0.3601
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/24.9.wav
+    23
+
+    0.2601
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.10.wav
+    21
+
+    0.1601
+
+    0.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.11.wav
+    13
+
+    0.5601
+
+    1.3001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.12.wav
+    13
+
+    0.5601
+
+    1.3001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.13.wav
+    23
+
+    0.2801
+
+    1.3501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.14.wav
+    21
+
+    0.3201
+
+    1.8001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.15.wav
+    20
+
+    0.5301
+
+    1.8801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.16.wav
+    16
+
+    0.3101
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.17.wav
+    11
+
+    0.3501
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.18.wav
+    16
+
+    0.2301
+
+    0.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.19.wav
+    11
+
+    0.3501
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.8.wav
+    19
+
+    0.3301
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/25.9.wav
+    22
+
+    0.2501
+
+    1.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.10.wav
+    24
+
+    0.4101
+
+    1.9201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.11.wav
+    10
+
+    0.3001
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.12.wav
+    10
+
+    0.3001
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.13.wav
+    24
+
+    0.2301
+
+    1.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.14.wav
+    24
+
+    0.2101
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.15.wav
+    20
+
+    0.3301
+
+    1.7801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.16.wav
+    18
+
+    0.2101
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.17.wav
+    22
+
+    0.3601
+
+    1.5701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/26.9.wav
+    17
+
+    0.2001
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.10.wav
+    19
+
+    0.6201
+
+    3.5401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.11.wav
+    23
+
+    0.2801
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.12.wav
+    23
+
+    0.2801
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.13.wav
+    21
+
+    0.1701
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.14.wav
+    19
+
+    0.3101
+
+    1.3901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.15.wav
+    16
+
+    0.3001
+
+    1.0301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.16.wav
+    20
+
+    0.2601
+
+    1.5001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.17.wav
+    27
+
+    0.3301
+
+    1.6501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.18.wav
+    16
+
+    0.2101
+
+    1.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.19.wav
+    16
+
+    0.2401
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.20.wav
+    21
+
+    0.2101
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.7.wav
+    22
+
+    0.3701
+
+    3.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.8.wav
+    21
+
+    0.2001
+
+    1.0101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/27.9.wav
+    20
+
+    0.4101
+
+    1.4301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.10.wav
+    22
+
+    0.2701
+
+    1.1501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.11.wav
+    14
+
+    0.2301
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.12.wav
+    14
+
+    0.2301
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.13.wav
+    20
+
+    0.2401
+
+    1.0101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.14.wav
+    15
+
+    0.3201
+
+    0.9001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.16.wav
+     7
+
+    0.1301
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.17.wav
+    18
+
+    0.2601
+
+    1.5501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.18.wav
+    15
+
+    0.2201
+
+    1.1901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.19.wav
+    21
+
+    0.3201
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/28.20.wav
+    22
+
+    0.3001
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.1.wav
+    24
+
+    0.2801
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.18.wav
+    20
+
+    0.5301
+
+    1.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.19.wav
+    19
+
+    0.2201
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.2.wav
+    24
+
+    0.3201
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.20.wav
+    21
+
+    0.3701
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.4.wav
+    17
+
+    0.2701
+
+    1.3301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.5.wav
+    21
+
+    0.5001
+
+    1.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.6.wav
+    24
+
+    0.2401
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.7.wav
+    23
+
+    0.1701
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/29.8.wav
+    23
+
+    0.3101
+
+    1.5401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.10.wav
+    17
+
+    0.3101
+
+    1.6701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.11.wav
+    20
+
+    0.3001
+
+    1.6801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.12.wav
+    20
+
+    0.2301
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.13.wav
+    24
+
+    0.2001
+
+    1.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.14.wav
+     8
+
+    0.4201
+
+    2.2501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.15.wav
+    15
+
+    0.2001
+
+    1.8001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.16.wav
+    19
+
+    0.3801
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.18.wav
+    11
+
+    0.3701
+
+    1.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.2.wav
+    22
+
+    0.3301
+
+    1.4301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.3.wav
+    17
+
+    0.2801
+
+    1.4301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.4.wav
+    22
+
+    0.4501
+
+    1.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.5.wav
+    12
+
+    0.1901
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.6.wav
+    18
+
+    0.2101
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.7.wav
+    14
+
+    0.4101
+
+    1.5401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.8.wav
+     5
+
+    0.2901
+
+    2.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/3.9.wav
+    15
+
+    0.3401
+
+    1.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.1.wav
+    18
+
+    0.3301
+
+    1.6601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.11.wav
+    21
+
+    0.2301
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.2.wav
+    17
+
+    0.2001
+
+    1.1301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.4.wav
+    17
+
+    1.6701
+
+    3.0901
+
+    2.2201
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.5.wav
+    18
+
+    0.1901
+
+    0.8101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.6.wav
+    19
+
+    0.2801
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.7.wav
+    16
+
+    0.4501
+
+    1.6301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.8.wav
+    14
+
+    0.4701
+
+    2.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/30.9.wav
+    14
+
+    0.2501
+
+    1.5001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.1.wav
+    21
+
+    0.2201
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.10.wav
+    21
+
+    0.3001
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.2.wav
+    20
+
+    0.3501
+
+    1.5301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.20.wav
+    14
+
+    0.4201
+
+    1.6301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.3.wav
+    24
+
+    0.1901
+
+    0.8401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.4.wav
+    22
+
+    0.2701
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.5.wav
+    14
+
+    0.3001
+
+    1.7601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.6.wav
+    17
+
+    0.2201
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.7.wav
+    23
+
+    0.2501
+
+    1.3501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/31.8.wav
+    19
+
+    0.2601
+
+    0.7901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.1.wav
+    15
+
+    0.3401
+
+    1.4701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.10.wav
+    20
+
+    0.4401
+
+    2.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.2.wav
+    17
+
+    0.2801
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.20.wav
+    21
+
+    0.3101
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.3.wav
+    19
+
+    0.2901
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.4.wav
+    27
+
+    0.3401
+
+    1.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.5.wav
+    16
+
+    0.4001
+
+    1.6001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.6.wav
+    21
+
+    0.2701
+
+    0.8201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.7.wav
+    20
+
+    0.5301
+
+    1.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.8.wav
+    20
+
+    0.4601
+
+    1.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/32.9.wav
+    15
+
+    0.2901
+
+    3.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.1.wav
+    15
+
+    0.1801
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.18.wav
+    12
+
+    0.3001
+
+    1.6301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.19.wav
+    16
+
+    0.2201
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.2.wav
+    21
+
+    0.3501
+
+    1.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.20.wav
+    17
+
+    0.2501
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.3.wav
+    18
+
+    0.3001
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.4.wav
+    16
+
+    0.2901
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.5.wav
+    12
+
+    1.1701
+
+    3.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.6.wav
+    17
+
+    0.2501
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.7.wav
+    16
+
+    0.2801
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/33.8.wav
+    21
+
+    0.2701
+
+    1.2101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.1.wav
+    11
+
+    0.3901
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.17.wav
+    18
+
+    0.2601
+
+    1.0301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.18.wav
+    11
+
+    0.3701
+
+    1.4901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.19.wav
+    12
+
+    0.2201
+
+    1.7701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.2.wav
+    21
+
+    0.2201
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.20.wav
+    15
+
+    0.3201
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.3.wav
+    18
+
+    0.5001
+
+    2.2701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.4.wav
+    10
+
+    0.2601
+
+    1.0201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.5.wav
+    10
+
+    0.2501
+
+    0.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/34.7.wav
+    16
+
+    0.3901
+
+    1.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.1.wav
+    19
+
+    0.9301
+
+    1.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.17.wav
+    17
+
+    0.2901
+
+    0.9301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.18.wav
+    21
+
+    0.2201
+
+    1.3901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.19.wav
+    23
+
+    0.3401
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.2.wav
+    20
+
+    0.4001
+
+    1.5901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.20.wav
+    22
+
+    0.3401
+
+    1.4101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.3.wav
+    16
+
+    0.3701
+
+    1.6601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.4.wav
+    12
+
+    0.3901
+
+    1.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.5.wav
+    20
+
+    0.3001
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.6.wav
+    17
+
+    0.3201
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/35.7.wav
+    16
+
+    0.3001
+
+    1.3501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.1.wav
+    23
+
+    0.1801
+
+    0.8401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.16.wav
+    22
+
+    0.4301
+
+    1.1501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.18.wav
+    21
+
+    0.2601
+
+    1.5401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.19.wav
+    23
+
+    0.2401
+
+    0.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.2.wav
+    21
+
+    0.4301
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.20.wav
+    17
+
+    0.2101
+
+    1.1201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.3.wav
+    17
+
+    0.1701
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.4.wav
+    17
+
+    0.2901
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.5.wav
+    14
+
+    0.3001
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/36.6.wav
+    22
+
+    0.2901
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.1.wav
+    22
+
+    0.4301
+
+    1.3501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.14.wav
+    24
+
+    0.3601
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.15.wav
+    17
+
+    0.2501
+
+    1.6601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.16.wav
+    10
+
+    0.2801
+
+    1.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.17.wav
+    28
+
+    0.1801
+
+    0.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.18.wav
+    20
+
+    0.2101
+
+    0.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.19.wav
+    15
+
+    0.3801
+
+    1.5701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.20.wav
+    16
+
+    0.2701
+
+    1.6601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.3.wav
+    20
+
+    0.3801
+
+    1.5301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/37.4.wav
+    24
+
+    0.3301
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.1.wav
+    14
+
+    0.2501
+
+    0.9201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.14.wav
+    10
+
+    0.3201
+
+    1.2101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.15.wav
+    19
+
+    0.3001
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.16.wav
+    17
+
+    0.2401
+
+    1.5501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.17.wav
+    22
+
+    0.3701
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.18.wav
+    13
+
+    0.2301
+
+    1.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.19.wav
+    23
+
+    0.2501
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.2.wav
+    17
+
+    0.1901
+
+    0.7701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.20.wav
+    15
+
+    0.2301
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.3.wav
+    18
+
+    0.2401
+
+    1.3001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/38.4.wav
+    14
+
+    0.3701
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.10.wav
+    20
+
+    0.5301
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.11.wav
+    13
+
+    0.1201
+
+    0.7501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.12.wav
+    13
+
+    0.1201
+
+    0.7501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.13.wav
+    16
+
+    0.3001
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.14.wav
+    17
+
+    0.2001
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/39.15.wav
+    20
+
+    0.3101
+
+    1.2101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.1.wav
+    22
+
+    0.3201
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.11.wav
+    16
+
+    0.2501
+
+    1.4801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.12.wav
+    16
+
+    0.2501
+
+    1.4801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.13.wav
+    10
+
+    0.2701
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.14.wav
+    19
+
+    0.4401
+
+    2.4001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.16.wav
+    13
+
+    0.2701
+
+    1.4401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.18.wav
+    15
+
+    0.3301
+
+    1.1301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.19.wav
+    19
+
+    0.3901
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/4.20.wav
+    21
+
+    0.1701
+
+    0.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.10.wav
+    18
+
+    0.1801
+
+    0.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.11.wav
+    14
+
+    0.5301
+
+    1.5801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.5.wav
+    14
+
+    0.2801
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.6.wav
+    19
+
+    0.7801
+
+    1.7201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.7.wav
+    21
+
+    0.2301
+
+    1.4201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.8.wav
+     3
+
+    0.2201
+
+    1.0201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/40.9.wav
+    19
+
+    0.2801
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.1.wav
+    11
+
+    0.3501
+
+    1.2201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.15.wav
+    13
+
+    0.4301
+
+    1.4701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.17.wav
+    23
+
+    0.4601
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.18.wav
+    18
+
+    0.2901
+
+    1.6201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.19.wav
+    17
+
+    0.1701
+
+    0.9101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.2.wav
+    15
+
+    0.4101
+
+    1.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.20.wav
+    21
+
+    0.2201
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.4.wav
+    18
+
+    0.3801
+
+    2.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.5.wav
+    16
+
+    0.2301
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.6.wav
+    16
+
+    0.2201
+
+    0.9801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.7.wav
+    19
+
+    0.1701
+
+    2.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/41.8.wav
+    17
+
+    0.5501
+
+    2.0801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.1.wav
+    22
+
+    0.3501
+
+    1.1501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.13.wav
+    24
+
+    0.2101
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.14.wav
+    20
+
+    0.2601
+
+    1.0801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.15.wav
+    20
+
+    0.3601
+
+    1.8201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.16.wav
+    15
+
+    0.2401
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.17.wav
+    17
+
+    0.4801
+
+    1.3801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.18.wav
+    17
+
+    0.3101
+
+    1.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.19.wav
+    20
+
+    0.3601
+
+    1.4001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.2.wav
+    18
+
+    0.3201
+
+    1.2401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.20.wav
+    22
+
+    0.2701
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/42.3.wav
+    23
+
+    0.2701
+
+    1.1701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.10.wav
+    15
+
+    0.2301
+
+    1.1901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.11.wav
+    21
+
+    0.2101
+
+    1.5201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.12.wav
+    21
+
+    0.2101
+
+    1.5201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.13.wav
+    19
+
+    0.3101
+
+    1.3901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.15.wav
+    17
+
+    0.2501
+
+    1.3901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.16.wav
+    21
+
+    0.1701
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.17.wav
+    22
+
+    0.2501
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.18.wav
+    22
+
+    0.2101
+
+    0.8801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/43.19.wav
+    21
+
+    0.3001
+
+    1.5901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.10.wav
+    16
+
+    0.3001
+
+    1.4001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.11.wav
+    14
+
+    0.1801
+
+    0.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.12.wav
+    14
+
+    0.1801
+
+    0.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.13.wav
+    15
+
+    0.3201
+
+    0.9001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.14.wav
+    17
+
+    0.2701
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.15.wav
+    23
+
+    0.2001
+
+    1.7301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.16.wav
+    21
+
+    0.3501
+
+    1.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/44.9.wav
+    24
+
+    0.1901
+
+    0.9201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.10.wav
+    17
+
+    0.2401
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.11.wav
+    16
+
+    0.4001
+
+    1.6001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.12.wav
+    16
+
+    0.4001
+
+    1.6001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.13.wav
+    21
+
+    0.2401
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.14.wav
+    17
+
+    0.3001
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.16.wav
+    17
+
+    0.3201
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.17.wav
+    23
+
+    0.1801
+
+    0.9201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.18.wav
+    16
+
+    0.2401
+
+    1.6401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.6.wav
+    17
+
+    0.6501
+
+    2.4501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.7.wav
+    15
+
+    0.4001
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.8.wav
+    14
+
+    0.3801
+
+    1.3301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/45.9.wav
+    21
+
+    0.2901
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.10.wav
+    10
+
+    0.2601
+
+    1.4001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.11.wav
+    21
+
+    0.3501
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.12.wav
+    21
+
+    0.3501
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.13.wav
+    14
+
+    0.2901
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.14.wav
+    18
+
+    0.2001
+
+    0.7701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.15.wav
+    15
+
+    0.2801
+
+    1.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.16.wav
+    17
+
+    0.2501
+
+    1.2101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.17.wav
+    17
+
+    0.2901
+
+    1.5801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.18.wav
+    11
+
+    0.5401
+
+    1.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.19.wav
+    19
+
+    0.2201
+
+    1.0201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.20.wav
+    18
+
+    0.2501
+
+    1.4501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.8.wav
+    23
+
+    0.2701
+
+    1.4101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/46.9.wav
+    20
+
+    0.2601
+
+    1.3001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.1.wav
+    16
+
+    0.3501
+
+    1.7701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.17.wav
+    18
+
+    0.3301
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.18.wav
+    12
+
+    0.3201
+
+    1.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.19.wav
+    13
+
+    0.2001
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.20.wav
+    19
+
+    0.1501
+
+    0.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.3.wav
+    19
+
+    0.3001
+
+    1.0101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.4.wav
+    20
+
+    0.1701
+
+    0.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.5.wav
+    20
+
+    0.3701
+
+    1.7901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.6.wav
+    23
+
+    0.4201
+
+    1.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/47.7.wav
+    14
+
+    0.3601
+
+    2.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.1.wav
+    16
+
+    0.3101
+
+    1.3301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.16.wav
+    10
+
+    0.3901
+
+    2.0301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.17.wav
+    23
+
+    0.2801
+
+    0.9601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.18.wav
+    18
+
+    0.1701
+
+    0.8501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.19.wav
+    16
+
+    0.1901
+
+    0.9501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.2.wav
+    21
+
+    0.2301
+
+    1.1201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.20.wav
+    16
+
+    0.2701
+
+    1.1301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.3.wav
+    22
+
+    0.4501
+
+    1.3201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.4.wav
+    17
+
+    0.1901
+
+    0.9901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.5.wav
+    16
+
+    0.3101
+
+    1.2601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/48.6.wav
+    14
+
+    0.4101
+
+    1.5401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.1.wav
+    24
+
+    0.2401
+
+    0.8001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.14.wav
+    20
+
+    0.3701
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.15.wav
+    19
+
+    0.3801
+
+    1.4601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.17.wav
+    11
+
+    0.3701
+
+    1.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.18.wav
+    18
+
+    0.2101
+
+    1.6201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.19.wav
+    11
+
+    0.3801
+
+    1.9301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.2.wav
+    15
+
+    0.2001
+
+    1.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.20.wav
+    19
+
+    0.5501
+
+    1.7201
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.3.wav
+    18
+
+    0.3101
+
+    2.0301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/49.4.wav
+    17
+
+    0.1901
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.1.wav
+    15
+
+    0.3701
+
+    1.6801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.16.wav
+    24
+
+    0.2001
+
+    1.0901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.17.wav
+    16
+
+    0.2601
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.18.wav
+    17
+
+    0.2801
+
+    1.2301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.19.wav
+    20
+
+    0.2401
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.2.wav
+    14
+
+    0.2601
+
+    1.4501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.20.wav
+    19
+
+    0.2301
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.3.wav
+    20
+
+    0.2501
+
+    1.0001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.4.wav
+    19
+
+    0.2201
+
+    2.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.5.wav
+    21
+
+    0.3901
+
+    1.6001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/5.6.wav
+    17
+
+    0.3101
+
+    1.6901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.10.wav
+    19
+
+    0.3901
+
+    2.0301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.11.wav
+    18
+
+    0.3201
+
+    1.1601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.12.wav
+    18
+
+    0.3201
+
+    1.1601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.13.wav
+    14
+
+    0.2101
+
+    1.1601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.14.wav
+    20
+
+    0.3401
+
+    1.1501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/50.15.wav
+    19
+
+    0.2301
+
+    1.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.10.wav
+    18
+
+    0.3601
+
+    1.4901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.11.wav
+    13
+
+    0.2301
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.12.wav
+    13
+
+    0.2301
+
+    0.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.2.wav
+    13
+
+    0.4401
+
+    1.7801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.3.wav
+    21
+
+    0.3101
+
+    2.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.4.wav
+    19
+
+    0.3501
+
+    1.2001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.5.wav
+    13
+
+    0.2801
+
+    1.0701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.6.wav
+    20
+
+    0.3701
+
+    1.7901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.7.wav
+    22
+
+    0.1801
+
+    0.7801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.8.wav
+    12
+
+    0.3401
+
+    1.7901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/6.9.wav
+    22
+
+    0.7601
+
+    1.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.10.wav
+    21
+
+    0.4801
+
+    1.3701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.11.wav
+    24
+
+    0.2501
+
+    1.3101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.2.wav
+    16
+
+    0.1801
+
+    1.3001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.3.wav
+    18
+
+    0.2201
+
+    0.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.4.wav
+    16
+
+    0.3401
+
+    4.8601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.5.wav
+    16
+
+    0.2401
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.6.wav
+    17
+
+    0.2501
+
+    1.1101
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.7.wav
+    22
+
+    0.5401
+
+    2.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/7.8.wav
+    20
+
+    0.4001
+
+    1.8701
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.1.wav
+    24
+
+    0.2101
+
+    1.2901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.10.wav
+    23
+
+    0.1801
+
+    0.7401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.2.wav
+    15
+
+    0.3601
+
+    1.9401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.20.wav
+    14
+
+    0.2401
+
+    1.4301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.3.wav
+    23
+
+    0.2701
+
+    0.8901
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.4.wav
+    21
+
+    0.2801
+
+    1.1801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.5.wav
+    21
+
+    0.2601
+
+    1.3401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.6.wav
+    15
+
+    0.2801
+
+    1.1401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.7.wav
+    24
+
+    0.7801
+
+    1.8801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.8.wav
+    22
+
+    0.2801
+
+    1.0401
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/8.9.wav
+    20
+
+    0.2301
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.1.wav
+    18
+
+    0.2701
+
+    1.1001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.17.wav
+    15
+
+    0.3201
+
+    2.0501
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.18.wav
+     8
+
+    0.8501
+
+    1.9301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.2.wav
+    22
+
+    0.3301
+
+    1.4301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.20.wav
+    18
+
+    0.3701
+
+    1.3601
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.3.wav
+    20
+
+    0.3501
+
+    1.8301
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.5.wav
+    10
+
+    0.3401
+
+    2.7001
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.6.wav
+    21
+
+    0.6501
+
+    1.2801
+
+     2
+
+/local/res/fiyou/data/in+my+experience/snippet_2000/9.7.wav
+    17
+
+    0.2901
+
+    0.9001
+
+     2
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function cut_prosody_snippet(target,part,longtarget,omit,limit1,limit2)
+
+if nargin < 1
+  target = 'in+my';
+  longtarget = 'in+my+experience';
+  part = '2000';
+  omit = 0;
+  limit1 = 1.5;
+  limit2 = 3.0;
+end
+
+if (part ~= 0)
+    base = [longtarget '_' part];
+else
+    base = longtarget;
+end
+
+fiyou = '/local/res/fiyou';
+datfile = [fiyou '/matlab/' base '.mat'];
+audiodir = [fiyou '/data/' longtarget '/audio_' part];
+outdir = [fiyou '/data/' longtarget '/snippet_' part];
+
+% Make the out directory
+system(['test -d ' outdir '|| mkdir ' outdir]);
+
+targetwds = upper(strsplit(target,'+'));
+%disp(targetwds);
+
+longtargetwds = upper(strsplit(longtarget,'+'));
+%disp(longtargetwds);
+
+targetwd1  = targetwds{1};
+targetwd2  = targetwds{2};
+
+%Load sets dat to a structure.
+load(datfile,'dat');
+
+Scp = dat.scp;
+P = dat.phone_indexer;
+Uid = dat.uid;
+%Wrd = dat.wrd;
+Basic = dat.basic;
+Align_pdf = dat.pdf;
+Align_phone = dat.align_phone;
+Align_phone_len = dat.phone_seq;
+Tra = dat.tra;
+ 
+% Index in Uid and Align of the utterance being displayed.
+ui = 1;
+
+% Maximum value for ui.
+[~,U] = size(Uid);
+
+% Initialize some variables that are set in nested functions.
+uid = 0; uid2 = 0; F = 0; Sb = 0; Pb = 0; Wb = 0; w = 0; w2 = 0; fs = 0;
+
+M = 0; S1 = 0; SN = 0; N = 100;
+F = 0; F1 = 0; FN = 0; nsample = 0; nframe = 0; nword = 0;
+PX = 0; ya = 0; tra = 0; wi = 1;
+Fn = 0; PDF = 0; spect = 0;
+
+% Pitch.
+% Return values for fxrapt.
+fx = 0; tt = 0; 
+% Version of tt with frame indexing.
+ttf = 0;
+% ttf and fx restricted to the frames being displayed.
+fx3 =0; tt3=0;
+AX = 0;
+
+utterance_data(ui);
+
+%disp(tra);
+
+% Set phone and audio data for k'th utterance.
+    function utterance_data(k)
+        uid = cell2mat(Uid(k));
+        [F,Sb,Pb,Wb,tra] = parse_ali(uid,Align_pdf,Align_phone_len,Tra,P,k);
+        % Escape underline for display.
+        uid2 = strrep(uid, '_', '\_');
+        PX = Align_phone{k};
+        PDF = Align_pdf{k};
+        % Maximum frame index
+        [~,Fn] = size(F);
+        % Load audio. Cat the pipe Scp(uid) into a temporary file.
+        % cmd = [Scp(uid), ' cat > /tmp/display_ali_tmp.wav'];
+        % This helps flac work.
+        % setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
+        % system(cmd);
+        % wav = '/tmp/display_ali_tmp.wav';
+        % Read the temporary wav file.
+        % [w,fs] = audioread(wav);
+        % Number of audio samples in a centisecond frame.
+        wav = find_audio(uid);
+    
+        [w,fs] = audioread(wav); 
+        w2 = w;
+        [~,ch] = size(w);
+        if (ch == 2)
+            w = w(:,2);
+        end
+        M = fs / 100;
+        [nsample,~] = size(w);
+        [~,nframe] = size(F);
+        [~,nword] = size(Wb);
+        % pitch
+        % [fx,tt]=fxrapt(w,fs);
+    end
+
+    function snippet(k)
+        utterance_data(k);
+        long_offset = find_target(longtargetwds);
+        % If the long target is not found.  It happens for 26.9 in 
+        % I+have+one+now.
+        if (long_offset < 1)
+           return; 
+        end
+        offset = find_target(targetwds,long_offset);
+        %disp(offset)
+        if (offset > 0)
+            st = max(1,floor((Wb(1,offset) - 1) * M));
+            mid = max(1,floor((Wb(2,offset) - 1) * M));
+            en = max(1,floor((Wb(2,offset + 1) - 1) * M));
+            
+            st2 = max(1,floor((Wb(1,max(offset - 1,0)) - 1) * M));
+            en2 = max(1,floor((Wb(2,min(offset + 2,nword)) - 1) * M));
+            
+            snippet_wav = w(st:en);
+            snippet_wav2 = w(st2:en2);
+            
+            swav1 = w(st:mid);
+            swav2 = w(mid:en);
+
+            % soundsc(snippet_wav,fs);
+        
+            outfile = [outdir,'/',Uid{k},'.wav'];
+            outfile2 = [outdir,'/',Uid{k},'.long.wav'];
+        
+            disp(outfile);
+            disp(offset);
+            len1 = length(snippet_wav) / fs;
+            len2 = length(snippet_wav2) / fs;
+            disp(len1);
+            disp(len2);
+            %pad1 = randn(fs - length(swav1),1) * 0.005;
+            pad1 = zeros(fs - length(swav1),1);
+            pad2 = zeros(fs - length(swav2),1);
+            
+            
+            snippet_wav = [pad1;swav1;swav2;pad2];
+            soundsc(snippet_wav,fs);
+            
+
+            
+            % spect = v_spgrambw(snippet_wav,fs,'pJcw');
+            
+            disp(length(snippet_wav) / fs );
+            
+            if (len1 < limit1)
+                audiowrite(outfile,snippet_wav,fs);
+                audiowrite(outfile2,snippet_wav2,fs);
+            end
+        end
+    end
+
+    % Range of samples being displayed, this is global.
+    SR = [];
+    
+    function wav = find_audio(uid)
+        % Load the audio, either by using Kaldi to generate a tmp wav file,
+        % or by reading from audiodir
+        if (audiodir ~= 0)
+            wav = [audiodir '/' uid '.wav'];
+        else
+            % Cat the pipe Scp(uid) into a temporary file.
+            cmd = [Scp(uid), ' cat > /tmp/display_ali_tmp.wav'];
+            % This helps flac work.
+            setenv('PATH', '/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin');
+            system(cmd);
+            wav = '/tmp/display_ali_tmp.wav';
+        end
+    end
+
+% The below gave an error for the item with tra
+% {'IN'}    {'MY'}    {'EXPERIENCE'}    {'ALL'}    {'THE'}    {'OTHER'}    {'OPTIONS'}    {'HAVE'}    {'SOLID'}
+%    {'SUPPORT'}    {'BUT'}    {'DO'}    {'HAVE'}    {'ROOM'}    {'TO'}    {'IMPROVE'}    {'IN'}    {'MY'}    {'EXPERIENCE'}
+% apparently because longtarget is found twice. Try to fix this by setting
+% the default k to 2 rather than 1.
+
+    function res = find_target(tw,k)
+        if nargin < 2
+            % k = 1;
+            k = 2;
+        end
+        if nargin < 1
+            tw = targetwds;
+        end
+        res = 0;
+        tlen = length(tw);
+        %for i = 1:(length(tra) - tlen)
+        for i = k:(length(tra) - tlen + 1)
+            if all(strcmp(tw, tra(i:(i + tlen - 1))))
+                %disp(strcmp(tw, tra(i:(i + tlen - 1))))
+                res = i;
+                break;
+            end
+        end  
+    end
+
+ 
+
+for k = 1:U
+%for k = 1:8
+    snippet(k);
+    pause(0.5);
+end
+
+ 
+end
+
+
+##### SOURCE END #####
+--></body></html>
