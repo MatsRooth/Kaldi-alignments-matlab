@@ -37,6 +37,7 @@ Tra = load_kaldi_transcript(transcript);
 % For mapping back and forth between phones and their indices.
 P = PhoneIndexer(phones);
 
+disp(P)
 % Load the alignments in various formats.
 % Cell array of Uid, and cell array of alignment vectors.
 [Uid,Basic,Align_pdf,Align_phone,Phone_seq] = load_ali3(basic_ali,pdf_ali,phone_ali,phone_seq);
